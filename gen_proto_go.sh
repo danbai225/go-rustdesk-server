@@ -1,0 +1,1 @@
+protoc --go_out=./proto ./hbb_common/protos/*
