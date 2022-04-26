@@ -104,7 +104,7 @@ impl Decoder for BytesCodec {
 impl Encoder<Bytes> for BytesCodec {
     type Error = io::Error;
 
-    fn encode(&mut self, data: Bytes, buf: &mut BytesMut) -> Result<(), io::Error> {
+    fn encode(&mut self, data: Bytes, bsrcuf: &mut BytesMut) -> Result<(), io::Error> {
         if self.raw {
             buf.reserve(data.len());
             buf.put(data);
