@@ -3,17 +3,16 @@ package my_bytes
 import (
 	"encoding/binary"
 	"errors"
-	"math"
 )
 
-func Decode(src []byte) (data []byte, err error) {
+func DecodeHead(src []byte) (uint, error) {
 	if src == nil {
-		return
+		return 0, errors.New("nil")
 	}
 	headLen := uint((src[0] & 0x3) + 1)
 	if uint(len(src)) < headLen {
-		err = errors.New("dataLen<headLen")
-		return
+		err := errors.New("dataLen<headLen")
+		return 0, err
 	}
 	n := uint(src[0])
 	if headLen > 1 {
@@ -26,12 +25,18 @@ func Decode(src []byte) (data []byte, err error) {
 		n |= uint(src[3]) << 24
 	}
 	n >>= 2
-	if n > math.MaxUint {
-		err = errors.New("too big packet")
+	return n + 1, nil
+}
+func Decode(src []byte) (data []byte, err error) {
+	if src == nil {
 		return
 	}
-	src = append(make([]byte, n), src...)
-	data = src[(len(src) - int(n)):]
+	headLen := uint((src[0] & 0x3) + 1)
+	if uint(len(src)) < headLen {
+		err = errors.New("dataLen<headLen")
+		return
+	}
+	data = src[headLen:]
 	return
 }
 
@@ -50,8 +55,8 @@ func Encoder(src []byte) (data []byte, err error) {
 		h := uint32(l<<2) | 0x2
 		temp := make([]byte, 2)
 		binary.LittleEndian.PutUint16(temp, uint16(h&0xFFFF))
-		src = append(temp, src...)
 		src = append([]byte{byte(h >> 16)}, src...)
+		src = append(temp, src...)
 	} else if l <= 0x3FFFFFFF {
 		temp := make([]byte, 4)
 		binary.LittleEndian.PutUint32(temp, uint32((l<<2)|0x3))

@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/danbai225/go-logs v0.1.3
-	github.com/golang/protobuf v1.5.0
+	go.uber.org/zap v1.21.0
 	google.golang.org/protobuf v1.28.0
 )
 
