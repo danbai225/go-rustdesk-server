@@ -2,10 +2,8 @@ package common
 
 import (
 	logs "github.com/danbai225/go-logs"
-	"go-rustdesk-server/model/model_proto"
 	"go-rustdesk-server/my_bytes"
 	"go.uber.org/zap/buffer"
-	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
 )
@@ -14,11 +12,11 @@ type monitor struct {
 	network string
 	addr    string
 	listen  net.Listener
-	conn    net.Conn
-	call    func(msg *model_proto.Message)
+	conn    *net.UDPConn
+	call    func(msg []byte, write func(data []byte) error)
 }
 
-func NewMonitor(network, addr string, call func(msg *model_proto.Message)) *monitor {
+func NewMonitor(network, addr string, call func(msg []byte, write func(data []byte) error)) *monitor {
 	return &monitor{network: network, addr: addr, call: call}
 }
 func (m *monitor) Start() {
@@ -32,8 +30,15 @@ func (m *monitor) Start() {
 	}()
 	var err error
 	if m.network == "udp" {
-		m.conn, err = net.ListenUDP(m.network, &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: 21116})
-		m.accept(m.conn)
+		addr, err1 := net.ResolveUDPAddr(m.network, m.addr)
+		if err1 != nil {
+			logs.Err(err1)
+		}
+		m.conn, err = net.ListenUDP(m.network, addr)
+		if err != nil {
+			logs.Err(err)
+		}
+		m.readUdp()
 	} else {
 		m.listen, err = net.Listen(m.network, m.addr)
 		if err != nil {
@@ -68,42 +73,63 @@ func (m *monitor) accept(conn net.Conn) {
 			continue
 		}
 		temp = temp[:readLen]
-		_, _ = bytes.Write(temp)
-		length, err := my_bytes.DecodeHead(bytes.Bytes())
-		if err != nil {
-			logs.Err(err)
-			return
-		}
-		//长度不匹配继续读
-		if int(length) < bytes.Len() {
-			logs.Err("int(length) <bytes.Len()")
-			return
-		} else if int(length) == bytes.Len() {
-			//解析协议
-			cp := make([]byte, bytes.Len())
-			copy(cp, bytes.Bytes())
-			go m.processMessage(cp)
-			bytes.Reset()
+		if m.network != "udp" {
+			length, err := my_bytes.DecodeHead(bytes.Bytes())
+			if err != nil {
+				logs.Err(err)
+				return
+			}
+			_, _ = bytes.Write(temp)
+			//长度不匹配继续读
+			if int(length) < bytes.Len() {
+				logs.Err("int(length) <bytes.Len()")
+				return
+			} else if int(length) == bytes.Len() {
+				//解析协议
+				cp := make([]byte, bytes.Len())
+				copy(cp, bytes.Bytes())
+				go m.processMessageData(cp[:bytes.Len()], conn)
+				bytes.Reset()
+			}
 		}
 	}
 }
-func (m *monitor) processMessage(data []byte) {
+func (m *monitor) readUdp() {
+	for {
+		temp := make([]byte, 1024)
+		readLen, addr, err := m.conn.ReadFromUDP(temp)
+		if err != nil && err != io.EOF {
+			logs.Err(err)
+			return
+		}
+		if readLen == 0 {
+			continue
+		}
+		temp = temp[:readLen]
+		m.call(temp, func(data []byte) error {
+			_, err2 := m.conn.WriteToUDP(data, addr)
+			return err2
+		})
+	}
+}
+
+func (m *monitor) processMessageData(data []byte, conn net.Conn) {
 	defer func() {
 		err := recover()
 		if err != nil {
 			logs.Err(err)
 		}
 	}()
-	msg := &model_proto.Message{}
-	decode, err := my_bytes.Decode(data)
-	if err != nil {
-		logs.Err(err)
-		return
+	var err error
+	if m.network != "udp" {
+		data, err = my_bytes.Decode(data)
+		if err != nil {
+			logs.Err(err)
+			return
+		}
 	}
-	err = proto.Unmarshal(decode, msg)
-	if err != nil {
-		logs.Err(err)
-		return
-	}
-	m.call(msg)
+	m.call(data, func(data []byte) error {
+		_, err2 := conn.Write(data)
+		return err2
+	})
 }

@@ -4,6 +4,7 @@ import (
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model/model_proto"
+	"google.golang.org/protobuf/proto"
 )
 
 func Start() {
@@ -18,6 +19,11 @@ func registered() {
 	//}
 	//dial.Write(model_proto.RegisterPk{})
 }
-func handlerMsg(message *model_proto.Message) {
+func handlerMsg(messageData []byte, write func(data []byte) error) {
+	message := model_proto.Message{}
+	err := proto.Unmarshal(messageData, &message)
+	if err != nil {
+		logs.Err(err)
+	}
 	logs.Info(message.Union)
 }
