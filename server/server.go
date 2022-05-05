@@ -26,14 +26,17 @@ func handlerMsgUDP(messageData []byte, write func(data []byte) error) {
 	if err != nil {
 		logs.Err(err)
 	}
-	switch reflect.TypeOf(message.Union).Kind() {
-	case model_proto.Type_RendezvousMessage_RegisterPk:
+	switch reflect.TypeOf(message.Union).String() {
+	case model_proto.TypeRendezvousMessageRegisterPk:
 		RegisterPk := message.GetRegisterPk()
-		logs.Info(string(RegisterPk.Uuid))
-		response := &model_proto.RegisterPkResponse{
-			Result: 0,
+		if RegisterPk == nil {
+			return
 		}
-		response.ProtoReflect()
+		response := model_proto.NewRendezvousMessage(&model_proto.RendezvousMessage_RegisterPkResponse{
+			RegisterPkResponse: &model_proto.RegisterPkResponse{
+				Result: 0,
+			},
+		})
 		marshal, err2 := proto.Marshal(response)
 		if err2 != nil {
 			logs.Err(err2)
@@ -42,6 +45,7 @@ func handlerMsgUDP(messageData []byte, write func(data []byte) error) {
 		if err2 != nil {
 			logs.Err(err2)
 		}
-
+	default:
+		logs.Info(reflect.TypeOf(message.Union).String())
 	}
 }

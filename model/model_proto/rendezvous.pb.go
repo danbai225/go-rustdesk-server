@@ -712,7 +712,7 @@ type RegisterPkResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Result RegisterPkResponse_Result `protobuf:"varint,1,opt,name=result,proto3,enum=hbb.RegisterPkResponse_Result" json:"result,omitempty"`
+	Result RegisterPkResponse_Result `protobuf:"varint,1,opt,name=result,proto3,enum=hbb.RegisterPkResponse_Result" json:"result"`
 }
 
 func (x *RegisterPkResponse) Reset() {
