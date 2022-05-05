@@ -3,7 +3,6 @@ package my_bytes
 import (
 	"encoding/binary"
 	"errors"
-	logs "github.com/danbai225/go-logs"
 )
 
 func DecodeHead(src []byte) (uint, error) {
@@ -32,8 +31,6 @@ func Decode(src []byte) (data []byte, err error) {
 	if src == nil {
 		return
 	}
-	head, err := DecodeHead(src)
-	logs.Info(head)
 	headLen := uint((src[0] & 0x3) + 1)
 	if uint(len(src)) < headLen {
 		err = errors.New("dataLen<headLen")

@@ -62,6 +62,7 @@ func (m *monitor) accept(conn net.Conn) {
 		}
 	}()
 	bytes := buffer.NewPool().Get()
+	length := uint(0)
 	for {
 		temp := make([]byte, 1024)
 		readLen, err := conn.Read(temp)
@@ -74,12 +75,14 @@ func (m *monitor) accept(conn net.Conn) {
 		}
 		temp = temp[:readLen]
 		if m.network != "udp" {
-			length, err := my_bytes.DecodeHead(bytes.Bytes())
-			if err != nil {
-				logs.Err(err)
-				return
-			}
 			_, _ = bytes.Write(temp)
+			if length == 0 && bytes.Len() > 0 {
+				length, err = my_bytes.DecodeHead(bytes.Bytes())
+				if err != nil {
+					logs.Err(err)
+					return
+				}
+			}
 			//长度不匹配继续读
 			if int(length) < bytes.Len() {
 				logs.Err("int(length) <bytes.Len()")
