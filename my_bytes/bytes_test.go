@@ -45,14 +45,14 @@ func TestDecodeHead(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if int(head) != len(encoder) {
+	if int(head) != b.Len() {
 		t.Error("!=")
 	}
 	head, err = DecodeHead(testData)
 	if err != nil {
 		t.Error(err)
 	}
-	if int(head) != len(testData) {
+	if int(head) != len(testData)-1 {
 		t.Error("!=")
 	}
 }
@@ -146,4 +146,175 @@ func TestEncoder(t *testing.T) {
 	if b.String() != string(data) {
 		t.Error("!=")
 	}
+}
+func memsetRepeat(v byte, l int) []byte {
+	if l == 0 {
+		return make([]byte, 0)
+	}
+	a := make([]byte, l)
+	a[0] = v
+	for bp := 1; bp < len(a); bp *= 2 {
+		copy(a[bp:], a[:bp])
+	}
+	return a
+}
+func TestTestCodec1(t *testing.T) {
+	data := memsetRepeat(byte(1), 0x3F)
+	encode, err := Encoder(data)
+	if err != nil {
+		t.Error(err)
+	}
+	cpData := make([]byte, len(encode))
+	copy(cpData, encode)
+	if len(encode) != 0x3F+1 {
+		t.Error("len(encode)!=0x3F + 1")
+	}
+	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+		t.Error("len err")
+	}
+	decode, err := Decode(encode)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(decode) != 0x3F {
+		t.Error("len(decode)!=0x3F")
+	}
+	if decode[0] != byte(1) {
+		t.Error("decode[0]!=byte(1)")
+	}
+	logs.Info(cpData)
+}
+func TestTestCodec2(t *testing.T) {
+	encoder, err := Encoder([]byte(""))
+	if err != nil {
+		t.Error(encoder, err)
+	}
+	data := memsetRepeat(byte(2), 0x3F+1)
+	encode, err := Encoder(data)
+	if err != nil {
+		t.Error(err)
+	}
+	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+		t.Error("len err")
+	}
+	cpData := make([]byte, len(encode))
+	copy(cpData, encode)
+	if len(encode) != 0x3F+1+2 {
+		t.Error("len(encode) != 0x3F+1+2")
+	}
+	decode, err := Decode(encode)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(decode) != 0x3F+1 {
+		t.Error("len(decode) !=  0x3F + 1")
+	}
+	if decode[0] != byte(2) {
+		t.Error("decode[0]!=byte(2)")
+	}
+	logs.Info(cpData)
+}
+func TestTestCodec3(t *testing.T) {
+	data := memsetRepeat(byte(3), 0x3F-1)
+	encode, err := Encoder(data)
+	if err != nil {
+		t.Error(err)
+	}
+	cpData := make([]byte, len(encode))
+	copy(cpData, encode)
+	if len(encode) != 0x3F+1-1 {
+		t.Error("len(encode) != 0x3F + 1 - 1 ")
+	}
+	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+		t.Error("len err")
+	}
+	decode, err := Decode(encode)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(decode) != 0x3F-1 {
+		t.Error("len(decode) != 0x3F - 1")
+	}
+	if decode[0] != byte(3) {
+		t.Error("decode[0]!=byte(3)")
+	}
+	logs.Info(cpData)
+}
+func TestTestCodec4(t *testing.T) {
+	data := memsetRepeat(byte(4), 0x3FFF)
+	encode, err := Encoder(data)
+	if err != nil {
+		t.Error(err)
+	}
+	cpData := make([]byte, len(encode))
+	copy(cpData, encode)
+	if len(encode) != 0x3FFF+2 {
+		t.Error("len(encode) != 0x3FFF+ 2")
+	}
+	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+		t.Error("len err")
+	}
+	decode, err := Decode(encode)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(decode) != 0x3FFF {
+		t.Error(" len(decode) != 0x3FFF ")
+	}
+	if decode[0] != byte(4) {
+		t.Error("decode[0]!=byte(4)")
+	}
+	logs.Info(cpData)
+}
+func TestTestCodec5(t *testing.T) {
+	data := memsetRepeat(byte(5), 0x3FFFFF)
+	encode, err := Encoder(data)
+	if err != nil {
+		t.Error(err)
+	}
+	cpData := make([]byte, len(encode))
+	copy(cpData, encode)
+	if len(encode) != 0x3FFFFF+3 {
+		t.Error("len(encode) != 0x3FFF+3")
+	}
+	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+		t.Error("len err")
+	}
+	decode, err := Decode(encode)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(decode) != 0x3FFFFF {
+		t.Error(" len(decode) != 0x3FFF ")
+	}
+	if decode[0] != byte(5) {
+		t.Error("decode[0]!=byte(5)")
+	}
+	//logs.Info(cpData)
+}
+func TestTestCodec6(t *testing.T) {
+	data := memsetRepeat(byte(6), 0x3FFFFF+1)
+	encode, err := Encoder(data)
+	if err != nil {
+		t.Error(err)
+	}
+	cpData := make([]byte, len(encode))
+	copy(cpData, encode)
+	if len(encode) != 0x3FFFFF+4+1 {
+		t.Error("len(encode) != 0x3FFFFF + 4 + 1 ")
+	}
+	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+		t.Error("len err")
+	}
+	decode, err := Decode(encode)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(decode) != 0x3FFFFF+1 {
+		t.Error(" len(decode) != 0x3FFFFF + 1 ")
+	}
+	if decode[0] != byte(6) {
+		t.Error("decode[0]!=byte(6)")
+	}
+	//logs.Info(cpData)
 }

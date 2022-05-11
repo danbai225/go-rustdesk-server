@@ -25,7 +25,7 @@ func DecodeHead(src []byte) (uint, error) {
 		n |= uint(src[3]) << 24
 	}
 	n >>= 2
-	return n + 1, nil
+	return n, nil
 }
 func Decode(src []byte) (data []byte, err error) {
 	if src == nil {
