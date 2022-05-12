@@ -9,9 +9,10 @@ var (
 	TypeMessageMessageCliprdr       = reflect.TypeOf(&Message_Cliprdr{}).String()
 	TypeMessageMessageLoginResponse = reflect.TypeOf(&Message_LoginResponse{}).String()
 
-	TypeRendezvousMessageRegisterPk     = reflect.TypeOf(&RendezvousMessage_RegisterPk{}).String()
-	TypeRendezvousMessageRegisterPeer   = reflect.TypeOf(&RendezvousMessage_RegisterPeer{}).String()
-	TypeRendezvousMessageSoftwareUpdate = reflect.TypeOf(&RendezvousMessage_SoftwareUpdate{}).String()
+	TypeRendezvousMessagePunchHoleRequest = reflect.TypeOf(&RendezvousMessage_PunchHoleRequest{}).String()
+	TypeRendezvousMessageRegisterPk       = reflect.TypeOf(&RendezvousMessage_RegisterPk{}).String()
+	TypeRendezvousMessageRegisterPeer     = reflect.TypeOf(&RendezvousMessage_RegisterPeer{}).String()
+	TypeRendezvousMessageSoftwareUpdate   = reflect.TypeOf(&RendezvousMessage_SoftwareUpdate{}).String()
 )
 
 var typeMap map[string]reflect.Type

@@ -16,3 +16,4 @@
 .idea
 logs/
 *.log
+clover-db

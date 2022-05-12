@@ -5,14 +5,14 @@ import (
 	"errors"
 )
 
-func DecodeHead(src []byte) (uint, error) {
+func DecodeHead(src []byte) (uint, uint, error) {
 	if src == nil || len(src) == 0 {
-		return 0, errors.New("nil")
+		return 0, 0, errors.New("nil")
 	}
 	headLen := uint((src[0] & 0x3) + 1)
 	if uint(len(src)) < headLen {
 		err := errors.New("dataLen<headLen")
-		return 0, err
+		return 0, 0, err
 	}
 	n := uint(src[0])
 	if headLen > 1 {
@@ -25,7 +25,17 @@ func DecodeHead(src []byte) (uint, error) {
 		n |= uint(src[3]) << 24
 	}
 	n >>= 2
-	return n, nil
+	realLength := n
+	if n <= 0x3F {
+		realLength += 1
+	} else if n <= 0x3FFF {
+		realLength += 2
+	} else if n <= 0x3FFFFF {
+		realLength += 3
+	} else if n <= 0x3FFFFFFF {
+		realLength += 4
+	}
+	return n, realLength, nil
 }
 func Decode(src []byte) (data []byte, err error) {
 	if src == nil {

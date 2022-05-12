@@ -41,14 +41,14 @@ func TestDecode2(t *testing.T) {
 func TestDecodeHead(t *testing.T) {
 	b := bytes.NewBufferString("TEST")
 	encoder, _ := Encoder(b.Bytes())
-	head, err := DecodeHead(encoder)
+	head, _, err := DecodeHead(encoder)
 	if err != nil {
 		t.Error(err)
 	}
 	if int(head) != b.Len() {
 		t.Error("!=")
 	}
-	head, err = DecodeHead(testData)
+	head, _, err = DecodeHead(testData)
 	if err != nil {
 		t.Error(err)
 	}
@@ -169,7 +169,7 @@ func TestTestCodec1(t *testing.T) {
 	if len(encode) != 0x3F+1 {
 		t.Error("len(encode)!=0x3F + 1")
 	}
-	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+	if l, _, _ := DecodeHead(encode); l != uint(len(data)) {
 		t.Error("len err")
 	}
 	decode, err := Decode(encode)
@@ -194,7 +194,7 @@ func TestTestCodec2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+	if l, _, _ := DecodeHead(encode); l != uint(len(data)) {
 		t.Error("len err")
 	}
 	cpData := make([]byte, len(encode))
@@ -225,7 +225,7 @@ func TestTestCodec3(t *testing.T) {
 	if len(encode) != 0x3F+1-1 {
 		t.Error("len(encode) != 0x3F + 1 - 1 ")
 	}
-	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+	if l, _, _ := DecodeHead(encode); l != uint(len(data)) {
 		t.Error("len err")
 	}
 	decode, err := Decode(encode)
@@ -251,7 +251,7 @@ func TestTestCodec4(t *testing.T) {
 	if len(encode) != 0x3FFF+2 {
 		t.Error("len(encode) != 0x3FFF+ 2")
 	}
-	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+	if l, _, _ := DecodeHead(encode); l != uint(len(data)) {
 		t.Error("len err")
 	}
 	decode, err := Decode(encode)
@@ -277,7 +277,7 @@ func TestTestCodec5(t *testing.T) {
 	if len(encode) != 0x3FFFFF+3 {
 		t.Error("len(encode) != 0x3FFF+3")
 	}
-	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+	if l, _, _ := DecodeHead(encode); l != uint(len(data)) {
 		t.Error("len err")
 	}
 	decode, err := Decode(encode)
@@ -303,7 +303,7 @@ func TestTestCodec6(t *testing.T) {
 	if len(encode) != 0x3FFFFF+4+1 {
 		t.Error("len(encode) != 0x3FFFFF + 4 + 1 ")
 	}
-	if l, _ := DecodeHead(encode); l != uint(len(data)) {
+	if l, _, _ := DecodeHead(encode); l != uint(len(data)) {
 		t.Error("len err")
 	}
 	decode, err := Decode(encode)

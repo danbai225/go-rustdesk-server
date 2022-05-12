@@ -62,7 +62,7 @@ func (m *monitor) accept(conn net.Conn) {
 		}
 	}()
 	bytes := buffer.NewPool().Get()
-	length := uint(0)
+	realLength := uint(0)
 	for {
 		temp := make([]byte, 1024)
 		readLen, err := conn.Read(temp)
@@ -76,18 +76,18 @@ func (m *monitor) accept(conn net.Conn) {
 		temp = temp[:readLen]
 		if m.network != "udp" {
 			_, _ = bytes.Write(temp)
-			if length == 0 && bytes.Len() > 0 {
-				length, err = my_bytes.DecodeHead(bytes.Bytes())
+			if realLength == 0 && bytes.Len() > 0 {
+				_, realLength, err = my_bytes.DecodeHead(bytes.Bytes())
 				if err != nil {
 					logs.Err(err)
 					return
 				}
 			}
 			//长度不匹配继续读
-			if int(length) < bytes.Len() {
+			if int(realLength) < bytes.Len() {
 				logs.Err("int(length) <bytes.Len()")
 				return
-			} else if int(length) == bytes.Len() {
+			} else if int(realLength) == bytes.Len() {
 				//解析协议
 				cp := make([]byte, bytes.Len())
 				copy(cp, bytes.Bytes())
