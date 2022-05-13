@@ -172,7 +172,7 @@ func (m *monitor) processMessageData(data []byte, conn net.Conn) {
 	if writer, ok = myWriterMap[k]; !ok {
 		writer = &Writer{
 			Type:  "tcp",
-			uConn: m.conn,
+			tConn: conn,
 		}
 		myWriterMap[k] = writer
 	}

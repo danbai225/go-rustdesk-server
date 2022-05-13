@@ -6,13 +6,12 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/data_server"
-	"io"
 )
 
 var dataSever data_server.DataSever
 var ctx = gctx.New()
 var cache = gcache.New()
-var connPeerMap = map[string]io.Writer{}
+var connPeerMap = map[string]*common.Writer{}
 
 func Start() {
 	var err error
@@ -21,6 +20,6 @@ func Start() {
 		logs.Err(err)
 		return
 	}
-	go common.NewMonitor("udp", ":21116", handlerMsgUDP).Start()
+	go common.NewMonitor("udp", ":21116", handlerMsg).Start()
 	common.NewMonitor("tcp", ":21116", handlerMsg).Start()
 }
