@@ -2,15 +2,15 @@ package server
 
 import (
 	logs "github.com/danbai225/go-logs"
+	"go-rustdesk-server/common"
 	"go-rustdesk-server/model/model_proto"
 	"google.golang.org/protobuf/proto"
-	"net"
 	"reflect"
 )
 
-func handlerMsg(messageData []byte, write func(data []byte) error, conn net.Conn) {
+func handlerMsg(msg []byte, writer *common.Writer) {
 	message := model_proto.RendezvousMessage{}
-	err := proto.Unmarshal(messageData, &message)
+	err := proto.Unmarshal(msg, &message)
 	if err != nil {
 		logs.Err(err)
 	}
@@ -31,15 +31,15 @@ func handlerMsg(messageData []byte, write func(data []byte) error, conn net.Conn
 			logs.Err(err2)
 			return
 		}
-		err2 = write(marshal)
+		_, err2 = writer.Write(marshal)
 		if err2 != nil {
 			logs.Err(err2)
 		}
 	}
 }
-func handlerMsgUDP(messageData []byte, write func(data []byte) error, conn net.Conn) {
+func handlerMsgUDP(msg []byte, writer *common.Writer) {
 	message := model_proto.RendezvousMessage{}
-	err := proto.Unmarshal(messageData, &message)
+	err := proto.Unmarshal(msg, &message)
 	if err != nil {
 		logs.Err(err)
 	}
@@ -51,7 +51,14 @@ func handlerMsgUDP(messageData []byte, write func(data []byte) error, conn net.C
 		if RegisterPk == nil {
 			return
 		}
-		response = model_proto.NewRendezvousMessage(RendezvousMessageRegisterPk(RegisterPk))
+		pk := RendezvousMessageRegisterPk(RegisterPk)
+		response = model_proto.NewRendezvousMessage(pk)
+		if pk.Result == model_proto.RegisterPkResponse_OK {
+			if _, ok := connPeerMap[RegisterPk.GetId()]; !ok {
+				connPeerMap[RegisterPk.GetId()] = writer
+			}
+		}
+
 	case model_proto.TypeRendezvousMessageRegisterPeer:
 		//注册id
 		RegisterPeer := message.GetRegisterPeer()
@@ -75,7 +82,7 @@ func handlerMsgUDP(messageData []byte, write func(data []byte) error, conn net.C
 			logs.Err(err2)
 			return
 		}
-		err2 = write(marshal)
+		_, err2 = writer.Write(marshal)
 		if err2 != nil {
 			logs.Err(err2)
 		}

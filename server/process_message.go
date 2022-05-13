@@ -4,6 +4,7 @@ import (
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/model"
 	"go-rustdesk-server/model/model_proto"
+	"google.golang.org/protobuf/proto"
 )
 
 func RendezvousMessageRegisterPeer(message *model_proto.RegisterPeer) *model_proto.RegisterPeerResponse {
@@ -60,5 +61,31 @@ func RendezvousMessageSoftwareUpdate(message *model_proto.SoftwareUpdate) *model
 }
 func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest) *model_proto.PunchHoleResponse {
 	res := &model_proto.PunchHoleResponse{}
+	peer, err := dataSever.GetPeerByID(message.Id)
+	if err != nil {
+		logs.Err(err)
+		res.OtherFailure = err.Error()
+		return res
+	}
+	if peer == nil {
+		res.Failure = model_proto.PunchHoleResponse_ID_NOT_EXIST
+	}
+	if w, ok := connPeerMap[message.GetId()]; !ok {
+		res.Failure = model_proto.PunchHoleResponse_OFFLINE
+	} else {
+		rendezvousMessage := model_proto.NewRendezvousMessage(&model_proto.FetchLocalAddr{
+			SocketAddr:  nil,
+			RelayServer: "",
+		})
+		marshal, err2 := proto.Marshal(rendezvousMessage)
+		if err2 != nil {
+			logs.Err(err2)
+			return res
+		}
+		_, err2 = w.Write(marshal)
+		if err2 != nil {
+			logs.Err(err2)
+		}
+	}
 	return res
 }

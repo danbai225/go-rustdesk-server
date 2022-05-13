@@ -5,7 +5,6 @@ import (
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model/model_proto"
 	"google.golang.org/protobuf/proto"
-	"net"
 )
 
 func Start() {
@@ -20,7 +19,7 @@ func registered() {
 	//}
 	//dial.Write(model_proto.RegisterPk{})
 }
-func handlerMsg(msg []byte, write func(data []byte) error, conn net.Conn) {
+func handlerMsg(msg []byte, writer *common.Writer) {
 	message := model_proto.Message{}
 	err := proto.Unmarshal(msg, &message)
 	if err != nil {

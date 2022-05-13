@@ -6,13 +6,13 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/data_server"
-	"net"
+	"io"
 )
 
 var dataSever data_server.DataSever
 var ctx = gctx.New()
 var cache = gcache.New()
-var connPeerMap = map[string]net.Conn{}
+var connPeerMap = map[string]io.Writer{}
 
 func Start() {
 	var err error

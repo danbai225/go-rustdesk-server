@@ -1,6 +1,8 @@
 package common
 
 import (
+	"errors"
+	"fmt"
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/my_bytes"
 	"go.uber.org/zap/buffer"
@@ -13,10 +15,37 @@ type monitor struct {
 	addr    string
 	listen  net.Listener
 	conn    *net.UDPConn
-	call    func(msg []byte, write func(data []byte) error, conn net.Conn)
+	call    func(msg []byte, writer *Writer)
+}
+type Writer struct {
+	Type  string
+	tConn net.Conn
+	uConn *net.UDPConn
+	addr  *net.UDPAddr
 }
 
-func NewMonitor(network, addr string, call func(msg []byte, write func(data []byte) error, conn net.Conn)) *monitor {
+func (w *Writer) Write(p []byte) (n int, err error) {
+	switch w.Type {
+	case "udp", "UDP":
+		return w.uConn.WriteToUDP(p, w.addr)
+	case "TCP", "tcp":
+		return w.tConn.Write(p)
+	}
+	return 0, errors.New("type Err")
+}
+func (w *Writer) GetAddr() string {
+	switch w.Type {
+	case "udp", "UDP":
+		return w.addr.String()
+	case "TCP", "tcp":
+		return w.tConn.RemoteAddr().String()
+	}
+	return ""
+}
+
+var myWriterMap = map[string]*Writer{}
+
+func NewMonitor(network, addr string, call func(msg []byte, writer *Writer)) *monitor {
 	return &monitor{network: network, addr: addr, call: call}
 }
 func (m *monitor) Start() {
@@ -109,10 +138,18 @@ func (m *monitor) readUdp() {
 			continue
 		}
 		temp = temp[:readLen]
-		m.call(temp, func(data []byte) error {
-			_, err2 := m.conn.WriteToUDP(data, addr)
-			return err2
-		}, nil)
+		var writer *Writer
+		var ok bool
+		k := fmt.Sprint("udp", addr.String())
+		if writer, ok = myWriterMap[k]; !ok {
+			writer = &Writer{
+				Type:  "udp",
+				uConn: m.conn,
+				addr:  addr,
+			}
+			myWriterMap[k] = writer
+		}
+		m.call(temp, writer)
 	}
 }
 
@@ -124,15 +161,20 @@ func (m *monitor) processMessageData(data []byte, conn net.Conn) {
 		}
 	}()
 	var err error
-	if m.network != "udp" {
-		data, err = my_bytes.Decode(data)
-		if err != nil {
-			logs.Err(err)
-			return
-		}
+	data, err = my_bytes.Decode(data)
+	if err != nil {
+		logs.Err(err)
+		return
 	}
-	m.call(data, func(data []byte) error {
-		_, err2 := conn.Write(data)
-		return err2
-	}, conn)
+	var writer *Writer
+	var ok bool
+	k := fmt.Sprint("tcp", conn.RemoteAddr().String())
+	if writer, ok = myWriterMap[k]; !ok {
+		writer = &Writer{
+			Type:  "tcp",
+			uConn: m.conn,
+		}
+		myWriterMap[k] = writer
+	}
+	m.call(data, writer)
 }
