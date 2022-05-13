@@ -21,10 +21,9 @@ func TestPeer(t *testing.T) {
 		t.Error(err)
 	}
 	err = sever.AddPeer(&model.Peer{
-		ID:     "1",
-		Serial: 2,
-		UUID:   "3",
-		PK:     []byte{1, 2, 3},
+		ID:   "1",
+		UUID: "3",
+		PK:   []byte{1, 2, 3},
 	})
 	if err != nil {
 		t.Error(err)
@@ -34,6 +33,11 @@ func TestPeer(t *testing.T) {
 		t.Error(err)
 	}
 	logs.Info(peer)
+	peer.PK = []byte{3, 2, 1}
+	err = sever.UpdatePeer(peer)
+	if err != nil {
+		t.Error(err)
+	}
 	all, err := sever.GetPeerAll()
 	if err != nil {
 		t.Error(err)

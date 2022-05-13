@@ -13,10 +13,10 @@ type monitor struct {
 	addr    string
 	listen  net.Listener
 	conn    *net.UDPConn
-	call    func(msg []byte, write func(data []byte) error)
+	call    func(msg []byte, write func(data []byte) error, conn net.Conn)
 }
 
-func NewMonitor(network, addr string, call func(msg []byte, write func(data []byte) error)) *monitor {
+func NewMonitor(network, addr string, call func(msg []byte, write func(data []byte) error, conn net.Conn)) *monitor {
 	return &monitor{network: network, addr: addr, call: call}
 }
 func (m *monitor) Start() {
@@ -112,7 +112,7 @@ func (m *monitor) readUdp() {
 		m.call(temp, func(data []byte) error {
 			_, err2 := m.conn.WriteToUDP(data, addr)
 			return err2
-		})
+		}, nil)
 	}
 }
 
@@ -134,5 +134,5 @@ func (m *monitor) processMessageData(data []byte, conn net.Conn) {
 	m.call(data, func(data []byte) error {
 		_, err2 := conn.Write(data)
 		return err2
-	})
+	}, conn)
 }

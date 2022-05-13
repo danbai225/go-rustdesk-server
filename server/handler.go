@@ -4,10 +4,11 @@ import (
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/model/model_proto"
 	"google.golang.org/protobuf/proto"
+	"net"
 	"reflect"
 )
 
-func handlerMsg(messageData []byte, write func(data []byte) error) {
+func handlerMsg(messageData []byte, write func(data []byte) error, conn net.Conn) {
 	message := model_proto.RendezvousMessage{}
 	err := proto.Unmarshal(messageData, &message)
 	if err != nil {
@@ -20,15 +21,7 @@ func handlerMsg(messageData []byte, write func(data []byte) error) {
 		if HoleRequest == nil {
 			return
 		}
-		logs.Info(HoleRequest.Id, HoleRequest.NatType, HoleRequest.ConnType)
-		response = model_proto.NewRendezvousMessage(&model_proto.PunchHoleResponse{
-			SocketAddr:   nil,
-			Pk:           nil,
-			Failure:      0,
-			RelayServer:  "",
-			Union:        nil,
-			OtherFailure: "",
-		})
+		response = model_proto.NewRendezvousMessage(RendezvousMessagePunchHoleRequest(HoleRequest))
 	default:
 		logs.Info(reflect.TypeOf(message.Union).String())
 	}
@@ -44,7 +37,7 @@ func handlerMsg(messageData []byte, write func(data []byte) error) {
 		}
 	}
 }
-func handlerMsgUDP(messageData []byte, write func(data []byte) error) {
+func handlerMsgUDP(messageData []byte, write func(data []byte) error, conn net.Conn) {
 	message := model_proto.RendezvousMessage{}
 	err := proto.Unmarshal(messageData, &message)
 	if err != nil {
@@ -53,12 +46,14 @@ func handlerMsgUDP(messageData []byte, write func(data []byte) error) {
 	var response proto.Message
 	switch reflect.TypeOf(message.Union).String() {
 	case model_proto.TypeRendezvousMessageRegisterPk:
+		//注册公钥
 		RegisterPk := message.GetRegisterPk()
 		if RegisterPk == nil {
 			return
 		}
-		response = model_proto.NewRendezvousMessage(&model_proto.RegisterPkResponse{Result: model_proto.RegisterPkResponse_OK})
+		response = model_proto.NewRendezvousMessage(RendezvousMessageRegisterPk(RegisterPk))
 	case model_proto.TypeRendezvousMessageRegisterPeer:
+		//注册id
 		RegisterPeer := message.GetRegisterPeer()
 		if RegisterPeer == nil {
 			return
@@ -70,10 +65,7 @@ func handlerMsgUDP(messageData []byte, write func(data []byte) error) {
 		if SoftwareUpdate == nil {
 			return
 		}
-		logs.Info(SoftwareUpdate.Url)
-		response = model_proto.NewRendezvousMessage(&model_proto.SoftwareUpdate{
-			Url: "",
-		})
+		response = model_proto.NewRendezvousMessage(RendezvousMessageSoftwareUpdate(SoftwareUpdate))
 	default:
 		logs.Info(reflect.TypeOf(message.Union).String())
 	}

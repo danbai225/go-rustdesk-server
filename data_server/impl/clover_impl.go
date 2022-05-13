@@ -78,3 +78,11 @@ func (c *CloverDataSever) GetPeerAll() ([]*model.Peer, error) {
 	}
 	return peers, err
 }
+
+func (c *CloverDataSever) UpdatePeer(peer *model.Peer) error {
+	m, err := common.ToMap(peer, "json")
+	if err != nil {
+		return err
+	}
+	return c.DB.Save(TableNamePeer, clover.NewDocumentOf(m))
+}
