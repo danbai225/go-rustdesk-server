@@ -29,11 +29,15 @@ func (w *Writer) Write(p []byte) (n int, err error) {
 	case "udp", "UDP":
 		return w.uConn.WriteToUDP(p, w.addr)
 	case "TCP", "tcp":
-		return w.tConn.Write(p)
+		encoder, err := my_bytes.Encoder(p)
+		if err != nil {
+			return 0, err
+		}
+		return w.tConn.Write(encoder)
 	}
 	return 0, errors.New("type Err")
 }
-func (w *Writer) GetAddr() string {
+func (w *Writer) GetAddrStr() string {
 	switch w.Type {
 	case "udp", "UDP":
 		return w.addr.String()

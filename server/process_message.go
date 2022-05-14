@@ -6,6 +6,7 @@ import (
 	"go-rustdesk-server/model/model_proto"
 	"go-rustdesk-server/my_bytes"
 	"google.golang.org/protobuf/proto"
+	"time"
 )
 
 func RendezvousMessageRegisterPeer(message *model_proto.RegisterPeer) *model_proto.RegisterPeerResponse {
@@ -24,35 +25,26 @@ func RendezvousMessageRegisterPeer(message *model_proto.RegisterPeer) *model_pro
 }
 func RendezvousMessageRegisterPk(message *model_proto.RegisterPk) *model_proto.RegisterPkResponse {
 	res := &model_proto.RegisterPkResponse{Result: model_proto.RegisterPkResponse_SERVER_ERROR}
-	//idPeer, err := dataSever.GetPeerByID(message.GetId())
-	//if err != nil {
-	//	logs.Err(err)
-	//	return res
-	//}
-	//uuPeer, err := dataSever.GetPeerByUUID(string(message.GetUuid()))
-	//if err != nil {
-	//	logs.Err(err)
-	//	return res
-	//}
-	//if idPeer != nil {
-	//	if idPeer.UUID == string(message.GetUuid()) {
-	//		res.Result = model_proto.RegisterPkResponse_OK
-	//		return res
-	//	}
-	//	res.Result = model_proto.RegisterPkResponse_ID_EXISTS
-	//	return res
-	//}
-	//if uuPeer != nil {
-	//	res.Result = model_proto.RegisterPkResponse_UUID_MISMATCH
-	//	return res
-	//}
+	idPeer, err := dataSever.GetPeerByID(message.GetId())
+	if err != nil {
+		logs.Err(err)
+		return res
+	}
+	if idPeer != nil {
+		if idPeer.UUID == string(message.GetUuid()) {
+			res.Result = model_proto.RegisterPkResponse_OK
+			return res
+		}
+		res.Result = model_proto.RegisterPkResponse_ID_EXISTS
+		return res
+	}
 	res.Result = model_proto.RegisterPkResponse_OK
 	peer := &model.Peer{
 		ID:   message.Id,
 		UUID: string(message.Uuid),
 		PK:   message.Pk,
 	}
-	err := dataSever.AddPeer(peer)
+	err = dataSever.AddPeer(peer)
 	if err != nil {
 		res.Result = model_proto.RegisterPkResponse_SERVER_ERROR
 		logs.Err(err)
@@ -79,10 +71,10 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest) *m
 	if w, ok := connPeerMap[message.GetId()]; !ok {
 		res.Failure = model_proto.PunchHoleResponse_OFFLINE
 	} else {
-		logs.Info(w.GetAddr())
+		logs.Info(w.GetAddrStr())
 		rendezvousMessage := model_proto.NewRendezvousMessage(&model_proto.FetchLocalAddr{
-			SocketAddr:  my_bytes.EncodeAddr(w.GetAddr()),
-			RelayServer: "127.0.0.1:21117",
+			SocketAddr:  my_bytes.EncodeAddr(w.GetAddrStr()),
+			RelayServer: "192.168.0.110",
 		})
 		marshal, err2 := proto.Marshal(rendezvousMessage)
 		if err2 != nil {
@@ -93,6 +85,32 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest) *m
 		if err2 != nil {
 			logs.Err(err2)
 		}
+		lMsg := getMsgForm(message.GetId(), model_proto.TypeRendezvousMessageLocalAddr, 3)
+		if lMsg == nil {
+			res.OtherFailure = "NoReturnMessage"
+			return res
+		}
+		if m, ok1 := lMsg.(*model_proto.LocalAddr); ok1 {
+			res.SocketAddr = m.SocketAddr
+			res.RelayServer = m.RelayServer
+		}
 	}
 	return res
+}
+func RendezvousMessageTestNatRequest(message *model_proto.TestNatRequest) *model_proto.TestNatResponse {
+	res := &model_proto.TestNatResponse{}
+	res.Cu = &model_proto.ConfigUpdate{
+		Serial:            message.Serial,
+		RendezvousServers: []string{"192.168.0.110"},
+	}
+	return res
+}
+func RendezvousMessageLocalAddr(message *model_proto.LocalAddr) {
+	r.Put(&ringMsg{
+		ID:      message.Id,
+		Type:    model_proto.TypeRendezvousMessageLocalAddr,
+		TimeOut: 3,
+		InsTime: time.Now(),
+		Val:     message,
+	})
 }
