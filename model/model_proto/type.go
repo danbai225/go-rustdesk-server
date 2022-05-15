@@ -15,6 +15,8 @@ var (
 	TypeRendezvousMessageSoftwareUpdate   = reflect.TypeOf(&RendezvousMessage_SoftwareUpdate{}).String()
 	TypeRendezvousMessageTestNatRequest   = reflect.TypeOf(&RendezvousMessage_TestNatRequest{}).String()
 	TypeRendezvousMessageLocalAddr        = reflect.TypeOf(&RendezvousMessage_LocalAddr{}).String()
+	TypeRendezvousMessageRequestRelay     = reflect.TypeOf(&RendezvousMessage_RequestRelay{}).String()
+	TypeRendezvousMessageRelayResponse    = reflect.TypeOf(&RendezvousMessage_RelayResponse{}).String()
 )
 
 var typeMap map[string]reflect.Type
@@ -27,6 +29,8 @@ func init() {
 		"RendezvousMessage_FetchLocalAddr":       reflect.TypeOf(&RendezvousMessage_FetchLocalAddr{}).Elem(),
 		"RendezvousMessage_PunchHoleResponse":    reflect.TypeOf(&RendezvousMessage_PunchHoleResponse{}).Elem(),
 		"RendezvousMessage_TestNatResponse":      reflect.TypeOf(&RendezvousMessage_TestNatResponse{}).Elem(),
+		"RendezvousMessage_RequestRelay":         reflect.TypeOf(&RendezvousMessage_RequestRelay{}).Elem(),
+		"RendezvousMessage_RelayResponse":        reflect.TypeOf(&RendezvousMessage_RelayResponse{}).Elem(),
 	}
 }
 

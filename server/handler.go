@@ -51,6 +51,7 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 	if err != nil {
 		logs.Err(err)
 	}
+	logs.Info(writer.Type(), writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
 	var response proto.Message
 	switch reflect.TypeOf(message.Union).String() {
 	case model_proto.TypeRendezvousMessagePunchHoleRequest:
@@ -59,27 +60,25 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		if HoleRequest == nil {
 			return
 		}
-		response = model_proto.NewRendezvousMessage(RendezvousMessagePunchHoleRequest(HoleRequest))
+		response = model_proto.NewRendezvousMessage(RendezvousMessagePunchHoleRequest(HoleRequest, writer))
 	case model_proto.TypeRendezvousMessageRegisterPk:
 		//注册公钥
 		RegisterPk := message.GetRegisterPk()
 		if RegisterPk == nil {
 			return
 		}
-		pk := RendezvousMessageRegisterPk(RegisterPk)
-		response = model_proto.NewRendezvousMessage(pk)
-		if pk.Result == model_proto.RegisterPkResponse_OK {
-			if _, ok := connPeerMap[RegisterPk.GetId()]; !ok {
-				connPeerMap[RegisterPk.GetId()] = writer
-			}
-		}
+		response = model_proto.NewRendezvousMessage(RendezvousMessageRegisterPk(RegisterPk))
 	case model_proto.TypeRendezvousMessageRegisterPeer:
 		//注册id
 		RegisterPeer := message.GetRegisterPeer()
 		if RegisterPeer == nil {
 			return
 		}
-		response = model_proto.NewRendezvousMessage(RendezvousMessageRegisterPeer(RegisterPeer))
+		peer := RendezvousMessageRegisterPeer(RegisterPeer)
+		response = model_proto.NewRendezvousMessage(peer)
+		if !peer.RequestPk {
+			writer.SetKey(RegisterPeer.GetId())
+		}
 	case model_proto.TypeRendezvousMessageSoftwareUpdate:
 		//软件更新
 		SoftwareUpdate := message.GetSoftwareUpdate()
@@ -105,7 +104,21 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		if LocalAddr == nil {
 			return
 		}
-		RendezvousMessageLocalAddr(LocalAddr)
+		RendezvousMessageLocalAddr(LocalAddr, writer)
+	case model_proto.TypeRendezvousMessageRequestRelay:
+		//请求继中
+		RequestRelay := message.GetRequestRelay()
+		if RequestRelay == nil {
+			return
+		}
+		response = model_proto.NewRendezvousMessage(RendezvousMessageRequestRelay(RequestRelay))
+	case model_proto.TypeRendezvousMessageRelayResponse:
+		//请求继中
+		RelayResponse := message.GetRelayResponse()
+		if RelayResponse == nil {
+			return
+		}
+		RendezvousMessageRelayResponse(RelayResponse)
 	default:
 		logs.Info(reflect.TypeOf(message.Union).String())
 	}

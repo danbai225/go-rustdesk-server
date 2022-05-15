@@ -1,6 +1,6 @@
 syntax = "proto3";
 package hbb;
-option go_package="../model_proto";
+
 message RegisterPeer {
   string id = 1;
   int32 serial = 2;

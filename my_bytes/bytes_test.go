@@ -11,7 +11,56 @@ import (
 
 var testData = []byte{100, 66, 23, 10, 14, 49, 50, 51, 49, 50, 51, 113, 113, 113, 113, 113, 113, 113, 113, 16, 2, 26, 3, 49, 50, 51}
 var testData2 = []byte{122, 82, 10, 8, 52, 50, 50, 50, 55, 51, 56, 51, 18, 36, 70, 49, 57, 49, 57, 57, 57, 52, 45, 66, 52, 51, 65, 45, 53, 57, 55, 48, 45, 66, 55, 68, 53, 45, 54, 53, 65, 66, 53, 53, 49, 68, 53, 56, 50, 69, 26, 32, 162, 208, 255, 250, 164, 248, 203, 65, 39, 191, 175, 216, 113, 41, 196, 148, 131, 230, 60, 101, 77, 17, 79, 148, 236, 119, 201, 242, 238, 162, 22, 217}
+var testData3 = []byte{164, 146, 1, 38, 18, 36, 98, 52, 101, 98, 99, 50, 102, 55, 45, 48, 99, 102, 48, 45, 52, 101, 51, 53, 45, 56, 51, 56, 48, 45, 50, 56, 54, 99, 49, 55, 49, 102, 101, 98, 55, 52}
+var testData4 = []byte{72, 74, 16, 10, 6, 101, 104, 55, 112, 103, 99, 18, 6, 100, 118, 51, 102, 117, 105}
+var testData5 = []byte{154, 42, 7, 8, 145, 187, 196, 184, 140, 48}
 
+func TestNameData34(t *testing.T) {
+	data, err := Decode(testData3)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	msg := &model_proto.RendezvousMessage{}
+	err = proto.Unmarshal(data, msg)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	data1, err1 := Decode(testData4)
+	if err1 != nil {
+		t.Error(err1)
+		return
+	}
+	msg = &model_proto.RendezvousMessage{}
+	err = proto.Unmarshal(data1, msg)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	data1, err1 = Decode(testData5)
+	if err1 != nil {
+		t.Error(err1)
+		return
+	}
+	msg = &model_proto.RendezvousMessage{}
+	err = proto.Unmarshal(data1, msg)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	message := model_proto.NewRendezvousMessage(&model_proto.RelayResponse{
+		SocketAddr:   []byte{},
+		Uuid:         "",
+		RelayServer:  "",
+		RefuseReason: "",
+		Version:      "1.1.9",
+	})
+	marshal, _ := proto.Marshal(message)
+	logs.Info(marshal)
+	encoder, _ := Encoder(marshal)
+	logs.Info(encoder)
+}
 func TestDecode(t *testing.T) {
 	data, err2 := Decode(testData)
 	if err2 != nil {

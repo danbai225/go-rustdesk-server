@@ -1,6 +1,6 @@
 syntax = "proto3";
 package hbb;
-option go_package="../model_proto";
+
 message VP9 {
   bytes data = 1;
   bool key = 2;
