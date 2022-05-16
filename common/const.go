@@ -1,5 +1,7 @@
 package common
 
 const (
-	PeerPrefix = "peer_"
+	udp     = "udp"
+	tcp     = "tcp"
+	keyPath = "id_ed25519"
 )

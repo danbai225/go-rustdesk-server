@@ -13,6 +13,7 @@ var queue = gqueue.New()
 var r = gring.New(10, true)
 
 func Start() {
+	common.LoadKey()
 	var err error
 	dataSever, err = data_server.GetDataSever()
 	if err != nil {

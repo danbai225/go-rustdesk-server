@@ -30,11 +30,6 @@ var cacheTimeOut = time.Second * 60
 //	}()
 //}
 
-const (
-	udp = "udp"
-	tcp = "tcp"
-)
-
 type Writer struct {
 	key   string
 	_type string

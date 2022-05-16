@@ -1,7 +1,6 @@
 package server
 
 import (
-	"crypto/ed25519"
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model"
@@ -95,22 +94,13 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 		if m, ok1 := lMsg.(*model_proto.LocalAddr); ok1 {
 			res.SocketAddr = m.GetLocalAddr()
 			res.RelayServer = m.GetRelayServer()
-			//[141 168 91 113 151 151 251 208 242 146 227 100 121 174 59 164 95 86 72 27 48 85 53 178 104 229 66 77 142 156 78 109]
-			//[103 31 16 224 74 152 53 188 219 120 179 120 173 31 252 237 6 134 146 199 21 95 0 253 249 62 30 42 239 39 152 9]
-			//decodeString, _ := base64.StdEncoding.DecodeString("OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=")
-			//sign := ed25519.Sign([]byte{57, 229, 110, 42, 78, 103, 148, 120, 151, 167, 224, 15, 54, 125, 24, 222, 144, 181, 35, 10, 112, 159, 142, 9, 26, 170, 208, 10, 197, 170, 152, 28}, peer.PK)
-			logs.Info(err)
-			key, privateKey, _ := ed25519.GenerateKey(nil)
-			logs.Info(key)
-			logs.Info(privateKey)
-			pk := model_proto.IdPk{
-				Id: peer.ID,
-				Pk: peer.PK,
-			}
-			data, _ := proto.Marshal(&pk)
-			res.Pk = ed25519.Sign(ed25519.NewKeyFromSeed([]byte("danbai")), data)
-			//todo
-			res.GetIsLocal()
+			//pk := model_proto.IdPk{
+			//	Id: peer.ID,
+			//	Pk: peer.PK,
+			//}
+			//data, _ := proto.Marshal(&pk)
+			res.Pk = peer.PK
+			res.Union = &model_proto.PunchHoleResponse_IsLocal{IsLocal: true}
 		}
 	}
 	return res
