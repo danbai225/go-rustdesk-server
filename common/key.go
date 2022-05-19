@@ -3,6 +3,8 @@ package common
 import (
 	"crypto/ed25519"
 	logs "github.com/danbai225/go-logs"
+	"go-rustdesk-server/model/model_proto"
+	"google.golang.org/protobuf/proto"
 	"io/ioutil"
 	"os"
 )
@@ -50,4 +52,15 @@ func Verify(data, sign []byte) bool {
 		}
 	}()
 	return ed25519.Verify(pk, data, sign)
+}
+func GetSignPK(version, id string, peerPK []byte) []byte {
+	bytes := make([]byte, 0)
+	if version == "" || id == "" {
+		return bytes
+	}
+	marshal, _ := proto.Marshal(&model_proto.IdPk{
+		Id: id,
+		Pk: peerPK,
+	})
+	return Sign(marshal)
 }

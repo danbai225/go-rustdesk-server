@@ -6,8 +6,6 @@ import (
 	"go-rustdesk-server/model/model_proto"
 	"google.golang.org/protobuf/proto"
 	"reflect"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -67,18 +65,19 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		if RegisterPk == nil {
 			return
 		}
-		response = model_proto.NewRendezvousMessage(RendezvousMessageRegisterPk(RegisterPk))
+		response = model_proto.NewRendezvousMessage(RendezvousMessageRegisterPk(RegisterPk, writer))
 	case model_proto.TypeRendezvousMessageRegisterPeer:
 		//注册id
 		RegisterPeer := message.GetRegisterPeer()
 		if RegisterPeer == nil {
 			return
 		}
-		peer := RendezvousMessageRegisterPeer(RegisterPeer)
+		peer := RendezvousMessageRegisterPeer(RegisterPeer, writer)
 		response = model_proto.NewRendezvousMessage(peer)
 		if !peer.RequestPk {
 			writer.SetKey(RegisterPeer.GetId())
 		}
+		ConfigureUpdate(writer)
 	case model_proto.TypeRendezvousMessageSoftwareUpdate:
 		//软件更新
 		SoftwareUpdate := message.GetSoftwareUpdate()
@@ -92,12 +91,7 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		if TestNatRequest == nil {
 			return
 		}
-		request := RendezvousMessageTestNatRequest(TestNatRequest)
-		str := writer.GetAddrStr()
-		split := strings.Split(str, ":")
-		parseUint, _ := strconv.ParseUint(split[1], 10, 32)
-		request.Port = int32(parseUint)
-		response = model_proto.NewRendezvousMessage(request)
+		response = model_proto.NewRendezvousMessage(RendezvousMessageTestNatRequest(TestNatRequest, writer))
 	case model_proto.TypeRendezvousMessageLocalAddr:
 		//本地地址返回
 		LocalAddr := message.GetLocalAddr()
@@ -119,18 +113,24 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 			return
 		}
 		RendezvousMessageRelayResponse(RelayResponse)
+	case model_proto.TypeRendezvousMessagePunchHoleSent:
+		//请求打洞
+		PunchHoleSent := message.GetPunchHoleSent()
+		if PunchHoleSent == nil {
+			return
+		}
+		response = model_proto.NewRendezvousMessage(RendezvousMessagePunchHoleSent(PunchHoleSent, writer))
+	case model_proto.TypeRendezvousMessageConfigureUpdate:
+		//请求打洞
+		ConfigUpdate := message.GetConfigureUpdate()
+		if ConfigUpdate == nil {
+			return
+		}
+		RendezvousMessageConfigureUpdate(ConfigUpdate)
 	default:
 		logs.Info(reflect.TypeOf(message.Union).String())
 	}
 	if response != nil {
-		marshal, err2 := proto.Marshal(response)
-		if err2 != nil {
-			logs.Err(err2)
-			return
-		}
-		_, err2 = writer.Write(marshal)
-		if err2 != nil {
-			logs.Err(err2)
-		}
+		writer.SendMsg(response)
 	}
 }

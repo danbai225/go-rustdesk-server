@@ -14,6 +14,7 @@ type monitor struct {
 	listen  net.Listener
 	conn    *net.UDPConn
 	call    func(msg []byte, writer *Writer)
+	relay   bool
 }
 
 func NewMonitor(network, addr string, call func(msg []byte, writer *Writer)) *monitor {
@@ -29,7 +30,7 @@ func (m *monitor) Start() {
 		}
 	}()
 	var err error
-	if m.network == "udp" {
+	if m.network == udp {
 		addr, err1 := net.ResolveUDPAddr(m.network, m.addr)
 		if err1 != nil {
 			logs.Err(err1)
@@ -58,8 +59,9 @@ func (m *monitor) Start() {
 }
 func (m *monitor) accept(conn net.Conn) {
 	writer := &Writer{
-		_type: "tcp",
+		_type: tcp,
 		tConn: conn,
+		loop:  true,
 	}
 	addWriter(conn.RemoteAddr().String(), tcp, writer)
 	defer func() {
@@ -73,7 +75,7 @@ func (m *monitor) accept(conn net.Conn) {
 	}()
 	bytes := buffer.NewPool().Get()
 	realLength := uint(0)
-	for {
+	for writer.loop {
 		temp := make([]byte, 1024)
 		readLen, err := conn.Read(temp)
 		if err != nil && err != io.EOF {
@@ -100,6 +102,9 @@ func (m *monitor) accept(conn net.Conn) {
 				bs := bytes.Bytes()[realLength:]
 				bytes.Reset()
 				bytes.Write(bs)
+			}
+			if m.relay && writer != nil {
+				writer.loop = false
 			}
 			go m.processMessageData(cp, conn)
 		}

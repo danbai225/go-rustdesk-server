@@ -11,7 +11,9 @@ type DataSever interface {
 	GetPeerByID(id string) (*model.Peer, error)
 	GetPeerAll() ([]*model.Peer, error)
 	AddPeer(peer *model.Peer) error
+	AddPeerOrUpdate(peer *model.Peer) error
 	UpdatePeer(peer *model.Peer) error
+	DelPeerByUUID(uuid string) error
 }
 
 var dataSever DataSever

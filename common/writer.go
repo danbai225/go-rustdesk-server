@@ -3,11 +3,15 @@ package common
 import (
 	"errors"
 	"fmt"
+	logs "github.com/danbai225/go-logs"
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/os/gctx"
 	"go-rustdesk-server/my_bytes"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -36,8 +40,28 @@ type Writer struct {
 	tConn net.Conn
 	uConn *net.UDPConn
 	addr  *net.UDPAddr
+	loop  bool
+}
+type Addr struct {
+	ip   string
+	port uint32
 }
 
+func (a *Addr) GetIP() string {
+	return a.ip
+}
+func (a *Addr) GetPort() uint32 {
+	return a.port
+}
+func (a *Addr) Parsing(addr string) {
+	split := strings.Split(addr, ":")
+	if len(split) != 2 {
+		return
+	}
+	a.ip = split[0]
+	p, _ := strconv.ParseUint(split[1], 10, 32)
+	a.port = uint32(p)
+}
 func (w *Writer) Type() string {
 	return w._type
 }
@@ -60,6 +84,30 @@ func (w *Writer) Write(p []byte) (n int, err error) {
 	}
 	return 0, errors.New("type Err")
 }
+func (w *Writer) WriteToAddr(p []byte, addr string) (n int, err error) {
+	switch w._type {
+	case udp:
+		if w.uConn == nil {
+			return 0, errors.New("uConn==nil")
+		}
+		udpAddr, err1 := net.ResolveUDPAddr(udp, addr)
+		if err1 != nil {
+			return 0, err1
+		}
+		return w.uConn.WriteToUDP(p, udpAddr)
+	case tcp:
+		//if w.tConn == nil {
+		//	return 0, errors.New("tConn==nil")
+		//}
+		//encoder, err := my_bytes.Encoder(p)
+		//if err != nil {
+		//	return 0, err
+		//}
+		//return w.tConn.Write(encoder)
+		return 0, errors.New("unrealized")
+	}
+	return 0, errors.New("type Err")
+}
 func (w *Writer) GetAddrStr() string {
 	switch w._type {
 	case udp:
@@ -68,6 +116,18 @@ func (w *Writer) GetAddrStr() string {
 		return w.tConn.RemoteAddr().String()
 	}
 	return ""
+}
+func (w *Writer) GetAddr() *Addr {
+	addr := ""
+	switch w._type {
+	case udp:
+		addr = w.addr.String()
+	case tcp:
+		addr = w.tConn.RemoteAddr().String()
+	}
+	a := &Addr{}
+	a.Parsing(addr)
+	return a
 }
 func (w *Writer) SetKey(key string) {
 	mk := ""
@@ -113,6 +173,17 @@ func (w *Writer) Copy(dst *Writer) {
 	go io.Copy(dst.tConn, w.tConn)
 	io.Copy(w.tConn, dst.tConn)
 }
+func (w *Writer) SendMsg(message proto.Message) {
+	marshal, err2 := proto.Marshal(message)
+	if err2 != nil {
+		logs.Err(err2)
+		return
+	}
+	_, err2 = w.Write(marshal)
+	if err2 != nil {
+		logs.Err(err2)
+	}
+}
 func GetWriter(key, _type string) (*Writer, error) {
 	mk := ""
 	switch _type {
@@ -140,4 +211,7 @@ func addWriter(key, _type string, w *Writer) {
 		t = 0
 	}
 	cache.Set(ctx, mk, w, t)
+}
+func RemoveWriter(w *Writer) {
+	w.remove()
 }

@@ -11,6 +11,8 @@ import (
 var dataSever data_server.DataSever
 var queue = gqueue.New()
 var r = gring.New(10, true)
+var rendezvousServers = []string{"1.14.47.89"}
+var serial = int32(1)
 
 func Start() {
 	common.LoadKey()
@@ -23,4 +25,9 @@ func Start() {
 	go common.NewMonitor("udp", ":21116", handlerMsg).Start()
 	go common.NewMonitor("tcp", ":21115", handlerMsg).Start()
 	common.NewMonitor("tcp", ":21116", handlerMsg).Start()
+}
+
+//黑名单检测
+func blacklistDetection(id string, addr *common.Addr) bool {
+	return false
 }

@@ -13,8 +13,6 @@ func Start() {
 	common.NewMonitor("tcp", ":21117", handlerMsg).Start()
 }
 
-var w *common.Writer
-
 func handlerMsg(msg []byte, writer *common.Writer) {
 	message := model_proto.RendezvousMessage{}
 	err := proto.Unmarshal(msg, &message)
@@ -24,32 +22,24 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		}
 		return
 	}
-	var response proto.Message
 	switch reflect.TypeOf(message.Union).String() {
 	case model_proto.TypeRendezvousMessageRequestRelay:
-		if w == nil {
-			w = writer
-		}
-		if w != nil && w != writer {
-			go w.Copy(writer)
-		}
-		//relay := message.GetRequestRelay()
-		//if relay == nil {
-		//	return
-		//}
-		//logs.Info(writer.GetAddrStr(), relay.GetId(), relay.GetConnType(), relay.GetSocketAddr(), relay.GetRelayServer(), relay.GetUuid())
-	default:
-		logs.Info(writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
-	}
-	if response != nil {
-		marshal, err2 := proto.Marshal(response)
-		if err2 != nil {
-			logs.Err(err2)
+		RequestRelay := message.GetRequestRelay()
+		if RequestRelay == nil {
 			return
 		}
-		_, err2 = writer.Write(marshal)
-		if err2 != nil {
-			logs.Err(err2)
+		uuid := RequestRelay.GetUuid()
+		if uuid != "" {
+			w, err1 := common.GetWriter(uuid, common.TCP)
+			if err1 != nil {
+				writer.SetKey(RequestRelay.GetUuid())
+			} else if w != nil {
+				common.RemoveWriter(writer)
+				common.RemoveWriter(w)
+				go writer.Copy(w)
+			}
 		}
+	default:
+		logs.Info(writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
 	}
 }

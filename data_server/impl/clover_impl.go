@@ -86,3 +86,16 @@ func (c *CloverDataSever) UpdatePeer(peer *model.Peer) error {
 	}
 	return c.DB.Save(TableNamePeer, clover.NewDocumentOf(m))
 }
+func (c *CloverDataSever) AddPeerOrUpdate(peer *model.Peer) error {
+	if err := c.AddPeer(peer); err != nil {
+		return c.UpdatePeer(peer)
+	}
+	return nil
+}
+func (c *CloverDataSever) DelPeerByUUID(uuid string) error {
+	peer, err := c.GetPeerByUUID(uuid)
+	if err == nil {
+		return c.DB.Query(TableNamePeer).Where(clover.Field("_id").Eq(peer.Uid)).Delete()
+	}
+	return nil
+}
