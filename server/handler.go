@@ -74,9 +74,6 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		}
 		peer := RendezvousMessageRegisterPeer(RegisterPeer, writer)
 		response = model_proto.NewRendezvousMessage(peer)
-		if !peer.RequestPk {
-			writer.SetKey(RegisterPeer.GetId())
-		}
 		ConfigureUpdate(writer)
 	case model_proto.TypeRendezvousMessageSoftwareUpdate:
 		//软件更新

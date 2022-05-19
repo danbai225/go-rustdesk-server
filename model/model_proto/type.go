@@ -33,6 +33,7 @@ func init() {
 		"RendezvousMessage_TestNatResponse":      reflect.TypeOf(&RendezvousMessage_TestNatResponse{}).Elem(),
 		"RendezvousMessage_RequestRelay":         reflect.TypeOf(&RendezvousMessage_RequestRelay{}).Elem(),
 		"RendezvousMessage_RelayResponse":        reflect.TypeOf(&RendezvousMessage_RelayResponse{}).Elem(),
+		"RendezvousMessage_ConfigUpdate":         reflect.TypeOf(&RendezvousMessage_ConfigureUpdate{}).Elem(),
 	}
 }
 

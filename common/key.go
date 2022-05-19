@@ -2,6 +2,7 @@ package common
 
 import (
 	"crypto/ed25519"
+	"encoding/base64"
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/model/model_proto"
 	"google.golang.org/protobuf/proto"
@@ -40,9 +41,10 @@ func LoadKey() {
 		logs.Err("open key err:", err)
 		return
 	}
+	logs.Info("key=", base64.StdEncoding.EncodeToString(pk))
 }
 func Sign(data []byte) []byte {
-	return ed25519.Sign(pk, data)
+	return ed25519.Sign(sk, data)
 }
 func Verify(data, sign []byte) bool {
 	defer func() {

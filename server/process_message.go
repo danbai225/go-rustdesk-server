@@ -90,7 +90,7 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 		idPeer.IP = writer.GetAddr().GetIP()
 		writer.SetKey(idPeer.ID)
 	}
-	change = ipChange || change
+	change = ipChange || change || idPeer == nil
 	if change {
 		now := time.Now()
 		peer := &model.Peer{
@@ -105,8 +105,10 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 			logs.Err(err)
 		} else {
 			res.Result = model_proto.RegisterPkResponse_OK
-			_ = dataSever.DelPeerByUUID(peer.UUID)
 		}
+	}
+	if res.Result == model_proto.RegisterPkResponse_OK {
+		writer.SetKey(message.GetId())
 	}
 	return res
 }
@@ -124,6 +126,7 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 	}
 	if peer == nil {
 		res.Failure = model_proto.PunchHoleResponse_ID_NOT_EXIST
+		return res
 	}
 	w, err := common.GetWriter(message.GetId(), common.UDP)
 	if err != nil {
@@ -238,5 +241,5 @@ func RendezvousMessagePunchHoleSent(message *model_proto.PunchHoleSent, writer *
 	return res
 }
 func RendezvousMessageConfigureUpdate(message *model_proto.ConfigUpdate) {
-
+	logs.Info(message.Serial, message.RendezvousServers)
 }
