@@ -17,4 +17,4 @@
 /logs
 *.log
 clover-db
-/rustdesk-server
+/rustdesk-server/
