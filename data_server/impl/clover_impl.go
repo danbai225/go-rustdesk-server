@@ -54,7 +54,8 @@ func (c *CloverDataSever) AddPeer(peer *model.Peer) error {
 	if err2 != nil {
 		return err2
 	} else if p != nil {
-		return errors.New("exist peer")
+		return c.DB.Query(TableNamePeer).Where(clover.Field("uuid").Eq(peer.UUID)).Update(map[string]interface{}{"ID": peer.ID})
+		//return errors.New("exist peer")
 	}
 	m, err := common.ToMap(peer, "json")
 	if err != nil {
