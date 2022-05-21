@@ -54,6 +54,25 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 		res.Result = model_proto.RegisterPkResponse_TOO_FREQUENT
 		return res
 	}
+	//改变 ID
+	if id := message.GetOldId(); id != "" {
+		idPeer, err := dataSever.GetPeerByID(id)
+		if err != nil {
+			logs.Debug(err)
+			return res
+		}
+		idPeer.ID = message.Id
+		err = dataSever.UpdatePeer(idPeer)
+		if err != nil {
+			res.Result = model_proto.RegisterPkResponse_SERVER_ERROR
+			logs.Err(err)
+		} else {
+			res.Result = model_proto.RegisterPkResponse_OK
+			writer.SetKey(message.Id)
+		}
+		return res
+	}
+
 	idPeer, err := dataSever.GetPeerByID(message.GetId())
 	if err != nil {
 		logs.Debug(err)
