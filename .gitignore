@@ -17,3 +17,4 @@
 /logs
 *.log
 clover-db
+config-dev.json
