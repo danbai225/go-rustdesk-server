@@ -11,6 +11,7 @@ import (
 )
 
 var pk []byte
+var pkStr string
 var sk []byte
 
 func genKey() error {
@@ -41,25 +42,18 @@ func LoadKey() {
 		logs.Err("open key err:", err)
 		return
 	}
-	logs.Info("key=", base64.StdEncoding.EncodeToString(pk))
+	pkStr = base64.StdEncoding.EncodeToString(pk)
+	logs.Info("key=", pkStr)
 }
 func Sign(data []byte) []byte {
-	return ed25519.Sign(sk, data)
-}
-func Verify(data, sign []byte) bool {
-	defer func() {
-		err := recover()
-		if err != nil {
-			logs.Err(err)
-		}
-	}()
-	return ed25519.Verify(pk, data, sign)
+	return append(ed25519.Sign(sk, data), data...)
 }
 func GetSignPK(version, id string, peerPK []byte) []byte {
 	bytes := make([]byte, 0)
 	if version == "" || id == "" {
 		return bytes
 	}
+	logs.Info(id, peerPK)
 	marshal, _ := proto.Marshal(&model_proto.IdPk{
 		Id: id,
 		Pk: peerPK,

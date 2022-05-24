@@ -172,6 +172,7 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 		if m, ok1 := lMsg.(*model_proto.LocalAddr); ok1 {
 			res.SocketAddr = m.GetLocalAddr()
 			res.RelayServer = m.GetRelayServer()
+
 			res.Pk = common.GetSignPK(m.GetVersion(), peer.ID, peer.PK)
 			res.Union = &model_proto.PunchHoleResponse_IsLocal{IsLocal: true}
 		}

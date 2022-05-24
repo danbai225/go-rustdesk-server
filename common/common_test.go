@@ -10,7 +10,6 @@ var pks = []byte{57, 229, 110, 42, 78, 103, 148, 120, 151, 167, 224, 15, 54, 125
 
 func TestGenKey(t *testing.T) {
 	LoadKey()
-
 	decodeString, _ := base64.StdEncoding.DecodeString("OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=")
 	logs.Info(decodeString)
 	logs.Info(pks)

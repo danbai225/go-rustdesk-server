@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/json"
+	logs "github.com/danbai225/go-logs"
 	"io/ioutil"
 	"os"
 )
@@ -22,12 +23,14 @@ func init() {
 	}
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err)
+		logs.Err(err)
+		return
 	}
 	Conf = &Config{}
 	err = json.Unmarshal(file, Conf)
 	if err != nil {
-		panic(err)
+		logs.Err(err)
+		return
 	}
 	loadList()
 }
