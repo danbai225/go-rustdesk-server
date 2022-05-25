@@ -18,6 +18,9 @@ type CloverDataSever struct {
 	DB *clover.DB
 }
 
+func (c *CloverDataSever) Close() error {
+	return c.DB.Close()
+}
 func (c *CloverDataSever) InitDB() error {
 	db, err := clover.Open("clover-db")
 	if err != nil {

@@ -19,6 +19,7 @@ type DataSever interface {
 	AddRelay(relay *model.Relay) error
 	AddRelayOrUpdate(relay *model.Relay) error
 	GetRelayAllOnline() ([]*model.Relay, error)
+	Close() error
 }
 
 var dataSever DataSever
