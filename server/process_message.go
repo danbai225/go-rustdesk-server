@@ -49,7 +49,6 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 		res.Result = model_proto.RegisterPkResponse_UUID_MISMATCH
 		return res
 	}
-	//todo 黑名单检测
 	if blacklistDetection(message.GetId(), writer.GetAddr()) {
 		res.Result = model_proto.RegisterPkResponse_TOO_FREQUENT
 		return res
@@ -261,5 +260,5 @@ func RendezvousMessagePunchHoleSent(message *model_proto.PunchHoleSent, writer *
 	return res
 }
 func RendezvousMessageConfigureUpdate(message *model_proto.ConfigUpdate) {
-	logs.Info(message.Serial, message.RendezvousServers)
+	logs.Debug(message.Serial, message.RendezvousServers)
 }

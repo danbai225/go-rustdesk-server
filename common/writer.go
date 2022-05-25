@@ -1,11 +1,13 @@
 package common
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	logs "github.com/danbai225/go-logs"
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/os/gctx"
+	"go-rustdesk-server/model/model_msg"
 	"go-rustdesk-server/my_bytes"
 	"google.golang.org/protobuf/proto"
 	"io"
@@ -174,6 +176,9 @@ func (w *Writer) Copy(dst *Writer) {
 	io.Copy(w.tConn, dst.tConn)
 }
 func (w *Writer) SendMsg(message proto.Message) {
+	if message == nil {
+		return
+	}
 	marshal, err2 := proto.Marshal(message)
 	if err2 != nil {
 		logs.Err(err2)
@@ -183,6 +188,26 @@ func (w *Writer) SendMsg(message proto.Message) {
 	if err2 != nil {
 		logs.Err(err2)
 	}
+}
+func (w *Writer) SendJsonMsg(message *model_msg.Msg) {
+	if message == nil {
+		return
+	}
+	marshal, err2 := json.Marshal(message)
+	if err2 != nil {
+		logs.Err(err2)
+		return
+	}
+	_, err2 = w.Write(marshal)
+	if err2 != nil {
+		logs.Err(err2)
+	}
+}
+func (w *Writer) Close() {
+	if w._type == tcp {
+		_ = w.tConn.Close()
+	}
+	w.remove()
 }
 func GetWriter(key, _type string) (*Writer, error) {
 	mk := ""

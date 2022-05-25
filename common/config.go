@@ -11,12 +11,15 @@ type Config struct {
 	WhiteList bool     `json:"whiteList"`
 	IpList    []string `json:"ipList"`
 	Debug     bool     `json:"debug"`
+	RegServer string   `json:"reg_server"`
+	RelayName string   `json:"relay_name"`
 }
 
 var Conf *Config
+var path string
 
 func init() {
-	path := "config.json"
+	path = "config.json"
 	env, _ := os.LookupEnv("RUST_DESK_CONF_PATH")
 	if env != "" {
 		path = env
@@ -33,4 +36,8 @@ func init() {
 		return
 	}
 	loadList()
+}
+func Save() {
+	marshal, _ := json.Marshal(Conf)
+	ioutil.WriteFile(path, marshal, os.ModePerm)
 }

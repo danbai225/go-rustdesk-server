@@ -14,3 +14,16 @@ func InList(ip string) bool {
 	}
 	return false
 }
+func GetList() []string {
+	ips := make([]string, len(ipMap))
+	for k, _ := range ipMap {
+		ips = append(ips, k)
+	}
+	return ips
+}
+func UpDataList(w bool, list []string) {
+	Conf.WhiteList = w
+	Conf.IpList = list
+	Save()
+	loadList()
+}

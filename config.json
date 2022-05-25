@@ -3,5 +3,7 @@
   "ipList": [
     "127.0.0.1"
   ],
-  "debug": false
+  "debug": false,
+  "reg_server":"",
+  "relay_name":""
 }

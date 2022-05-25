@@ -14,6 +14,11 @@ type DataSever interface {
 	AddPeerOrUpdate(peer *model.Peer) error
 	UpdatePeer(peer *model.Peer) error
 	DelPeerByUUID(uuid string) error
+	GetRelayByName(name string) (*model.Relay, error)
+	UpdateRelay(relay *model.Relay) error
+	AddRelay(relay *model.Relay) error
+	AddRelayOrUpdate(relay *model.Relay) error
+	GetRelayAllOnline() ([]*model.Relay, error)
 }
 
 var dataSever DataSever

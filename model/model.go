@@ -12,3 +12,11 @@ type Peer struct {
 	Disabled    bool       `json:"disabled"`
 	LastRegTime *time.Time `json:"last_reg_time"`
 }
+type Relay struct {
+	Uid         string     `json:"_id"`
+	Name        string     `json:"name"`
+	Port        uint32     `json:"port"`
+	IP          string     `json:"ip"`
+	Online      bool       `json:"online"`
+	LastRegTime *time.Time `json:"last_reg_time"`
+}

@@ -49,7 +49,7 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 	if err != nil {
 		logs.Err(err)
 	}
-	logs.Info(writer.Type(), writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
+	logs.Debug(writer.Type(), writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
 	var response proto.Message
 	switch reflect.TypeOf(message.Union).String() {
 	case model_proto.TypeRendezvousMessagePunchHoleRequest:
@@ -125,7 +125,7 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		}
 		RendezvousMessageConfigureUpdate(ConfigUpdate)
 	default:
-		logs.Info(reflect.TypeOf(message.Union).String())
+		logs.Debug(reflect.TypeOf(message.Union).String())
 	}
 	if response != nil {
 		writer.SendMsg(response)
