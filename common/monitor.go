@@ -4,7 +4,6 @@ import (
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/my_bytes"
 	"go.uber.org/zap/buffer"
-	"io"
 	"net"
 )
 
@@ -75,11 +74,10 @@ func (m *monitor) accept(conn net.Conn) {
 	}()
 	bytes := buffer.NewPool().Get()
 	realLength := uint(0)
+	temp := make([]byte, 1024)
 	for writer.loop {
-		temp := make([]byte, 1024)
 		readLen, err := conn.Read(temp)
-		if err != nil && err != io.EOF {
-			//logs.Err(err)
+		if err != nil {
 			return
 		}
 		if readLen == 0 {
@@ -115,7 +113,7 @@ func (m *monitor) readUdp() {
 		var writer *Writer
 		temp := make([]byte, 1024)
 		readLen, addr, err := m.conn.ReadFromUDP(temp)
-		if err != nil && err != io.EOF {
+		if err != nil {
 			if writer != nil {
 				writer.remove()
 			}
