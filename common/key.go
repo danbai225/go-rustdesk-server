@@ -25,6 +25,7 @@ func genKey() error {
 }
 func LoadKey() {
 	if !Exists(keyPath) {
+		os.MkdirAll("key", os.ModePerm)
 		err := genKey()
 		if err != nil {
 			logs.Err("gen key err :", err)

@@ -8,8 +8,7 @@ services:
       - ./config.json:/app/config.json
       - ./logs/:/app/logs
       - ./clover-db/:/app/clover-db
-      - ./id_ed25519:/app/id_ed25519
-      - ./id_ed25519.pub:/app/id_ed25519.pub
+      - ./key/:/app/key
     ports:
       - "21115:21115"
       - "21116:21116/tcp"

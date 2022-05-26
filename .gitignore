@@ -18,3 +18,4 @@
 *.log
 clover-db
 config-dev.json
+/key
