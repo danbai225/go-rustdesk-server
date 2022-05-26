@@ -6,7 +6,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
 RUN go env -w GO111MODULE=on
 RUN go env -w GOPROXY=https://goproxy.cn,direct
 RUN go env -w GOPATH="/go"
-RUN cd / && ls
 #安装所需工具
 RUN apk add gcc g++ make upx git
 #配置时区为中国
@@ -14,6 +13,9 @@ RUN apk add tzdata \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone
 
+#拉取代码
+RUN mkdir /build
+ADD ./ /build
 #构建
 WORKDIR /build
 RUN go build -ldflags '-w -s' -o go_rustdesk_server
