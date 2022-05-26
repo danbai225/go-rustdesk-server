@@ -49,6 +49,9 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 	if err != nil {
 		logs.Err(err)
 	}
+	if blacklistDetection("", writer.GetAddr()) {
+		return
+	}
 	logs.Debug(writer.Type(), writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
 	var response proto.Message
 	switch reflect.TypeOf(message.Union).String() {

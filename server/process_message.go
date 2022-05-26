@@ -49,10 +49,6 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 		res.Result = model_proto.RegisterPkResponse_UUID_MISMATCH
 		return res
 	}
-	if blacklistDetection(message.GetId(), writer.GetAddr()) {
-		res.Result = model_proto.RegisterPkResponse_TOO_FREQUENT
-		return res
-	}
 	//改变 ID
 	if id := message.GetOldId(); id != "" {
 		idPeer, err := dataSever.GetPeerByID(id)

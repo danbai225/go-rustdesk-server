@@ -6,5 +6,5 @@ then
 fi
 docker build -t danbai225/go-rustdesk-server:"$tag" .
 #docker build -t danbai225/go-rustdesk-server:latest .
-#docker push danbai225/go-rustdesk-server:"$tag"
+docker push danbai225/go-rustdesk-server:"$tag"
 #docker push danbai225/go-rustdesk-server:latest
