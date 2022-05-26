@@ -32,7 +32,11 @@ func Start() {
 
 //黑名单检测
 func blacklistDetection(id string, addr *common.Addr) bool {
-	if common.InList(addr.GetIP()) && !common.Conf.WhiteList {
+	in := common.InList(addr.GetIP())
+	if common.Conf.WhiteList && in {
+		return false
+	}
+	if !common.Conf.WhiteList && in {
 		return true
 	}
 	return false

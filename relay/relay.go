@@ -32,6 +32,7 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		}
 		return
 	}
+	logs.Debug(writer.Type(), writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
 	switch reflect.TypeOf(message.Union).String() {
 	case model_proto.TypeRendezvousMessageRequestRelay:
 		RequestRelay := message.GetRequestRelay()
@@ -56,7 +57,11 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 
 //黑名单检测
 func blacklistDetection(addr *common.Addr) bool {
-	if common.InList(addr.GetIP()) && !common.Conf.WhiteList {
+	in := common.InList(addr.GetIP())
+	if common.Conf.WhiteList && in {
+		return false
+	}
+	if !common.Conf.WhiteList && in {
 		return true
 	}
 	return false
