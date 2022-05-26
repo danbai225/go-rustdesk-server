@@ -235,7 +235,10 @@ func addWriter(key, _type string, w *Writer) {
 		mk = fmt.Sprint(tcp, key)
 		t = 0
 	}
-	cache.Set(ctx, mk, w, t)
+	err := cache.Set(ctx, mk, w, t)
+	if err != nil {
+		logs.Err(err)
+	}
 }
 func RemoveWriter(w *Writer) {
 	w.remove()

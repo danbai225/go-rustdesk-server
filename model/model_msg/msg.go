@@ -18,7 +18,7 @@ type Base struct {
 type RegMsg struct {
 	Name      string    `json:"name"`
 	Time      time.Time `json:"time"`
-	RelayPort uint32    `json:"relay_port"`
+	RelayPort uint16    `json:"relay_port"`
 }
 type RegMsgR struct {
 	Err string `json:"err"`

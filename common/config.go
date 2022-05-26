@@ -8,11 +8,14 @@ import (
 )
 
 type Config struct {
-	WhiteList bool     `json:"whiteList"`
-	IpList    []string `json:"ipList"`
-	Debug     bool     `json:"debug"`
-	RegServer string   `json:"reg_server"`
-	RelayName string   `json:"relay_name"`
+	WhiteList  bool     `json:"whiteList"`
+	IpList     []string `json:"ipList"`
+	Debug      bool     `json:"debug"`
+	RegServer  string   `json:"reg_server"`
+	RelayName  string   `json:"relay_name"`
+	RegPort    uint16   `json:"reg_port"`
+	ServerPort uint16   `json:"server_port"`
+	RelayPort  uint16   `json:"relay_port"`
 }
 
 var Conf *Config
@@ -39,5 +42,8 @@ func init() {
 }
 func Save() {
 	marshal, _ := json.Marshal(Conf)
-	ioutil.WriteFile(path, marshal, os.ModePerm)
+	err := ioutil.WriteFile(path, marshal, os.ModePerm)
+	if err != nil {
+		logs.Err(err)
+	}
 }

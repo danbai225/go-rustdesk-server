@@ -1,6 +1,7 @@
 package relay
 
 import (
+	"fmt"
 	logs "github.com/danbai225/go-logs"
 	"github.com/goccy/go-json"
 	"go-rustdesk-server/common"
@@ -15,7 +16,7 @@ import (
 
 func Start() {
 	go regRelay()
-	common.NewMonitor("tcp", ":21117", handlerMsg).Start()
+	common.NewMonitor("tcp", fmt.Sprintf(":%d", common.Conf.RelayPort), handlerMsg).Start()
 }
 
 func handlerMsg(msg []byte, writer *common.Writer) {
@@ -70,10 +71,13 @@ func regRelay() {
 				Base: model_msg.Base{
 					MsgType: model_msg.RegType,
 				},
-				RegMsg: &model_msg.RegMsg{Time: time.Now(), RelayPort: 21117},
+				RegMsg: &model_msg.RegMsg{Time: time.Now(), RelayPort: common.Conf.RelayPort},
 			})
-			dial.Write(marshal)
-			time.Sleep(time.Second)
+			_, err1 := dial.Write(marshal)
+			if err1 != nil {
+				logs.Err(err1)
+			}
+			time.Sleep(time.Second * 15)
 		}
 	}()
 	for {

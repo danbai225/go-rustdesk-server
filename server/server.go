@@ -24,10 +24,10 @@ func Start() {
 		return
 	}
 	loadRelay()
-	go common.NewMonitor("udp", ":21116", handlerMsg).Start()
-	go common.NewMonitor("tcp", ":21115", handlerMsg).Start()
-	go common.NewMonitor("tcp", ":21120", handlerSyncMsg).Start()
-	common.NewMonitor("tcp", ":21116", handlerMsg).Start()
+	go common.NewMonitor("udp", fmt.Sprintf(":%d", common.Conf.ServerPort), handlerMsg).Start()
+	go common.NewMonitor("tcp", fmt.Sprintf(":%d", common.Conf.ServerPort-1), handlerMsg).Start()
+	go common.NewMonitor("udp", fmt.Sprintf(":%d", common.Conf.RegPort), handlerSyncMsg).Start()
+	common.NewMonitor("tcp", fmt.Sprintf(":%d", common.Conf.ServerPort), handlerMsg).Start()
 }
 
 //黑名单检测

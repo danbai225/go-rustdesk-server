@@ -64,12 +64,8 @@ func (m *monitor) accept(conn net.Conn) {
 	}
 	addWriter(conn.RemoteAddr().String(), tcp, writer)
 	defer func() {
-		if conn != nil {
-			writer, _ := GetWriter(conn.RemoteAddr().String(), tcp)
-			if writer != nil {
-				writer.remove()
-			}
-			_ = conn.Close()
+		if writer != nil {
+			writer.Close()
 		}
 	}()
 	bytes := buffer.NewPool().Get()
@@ -99,7 +95,10 @@ func (m *monitor) accept(conn net.Conn) {
 			if bytes.Len() != int(realLength) {
 				bs := bytes.Bytes()[realLength:]
 				bytes.Reset()
-				bytes.Write(bs)
+				_, err = bytes.Write(bs)
+				if err != nil {
+					logs.Err(err)
+				}
 			}
 			if m.relay && writer != nil {
 				writer.loop = false
@@ -117,7 +116,6 @@ func (m *monitor) readUdp() {
 			if writer != nil {
 				writer.remove()
 			}
-			logs.Err(err)
 			return
 		}
 		if readLen == 0 {
