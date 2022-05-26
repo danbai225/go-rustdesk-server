@@ -3,7 +3,7 @@
   "ipList": [
     "127.0.0.1"
   ],
-  "debug": false,
+  "debug": true,
   "reg_server":"127.0.0.1:21120",
   "relay_name":"go_rust_desk_relay",
   "server_port": 21116,

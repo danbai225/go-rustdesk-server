@@ -1,12 +1,11 @@
 version: "3"
 services:
   go-rustdesk-server:
-    image: danbai225/go-rustdesk-server:latest
+    image: danbai225/go-rustdesk-server:build
     container_name: go-rustdesk-server
     restart: always
     volumes:
-      - ./conf.json:/app/conf.json
-      - ./logs/:/app/logs
+      - ./config.json:/app/config.json
       - ./logs/:/app/logs
       - ./clover-db/:/app/clover-db
     ports:

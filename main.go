@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	_relay := flag.Bool("relay", false, "run relay")
+	_relay := flag.Bool("relay", common.Conf.RelayName != "", "run relay")
 	_server := flag.Bool("server", true, "run server")
 	flag.Parse()
 	if *_relay {
@@ -25,7 +25,7 @@ func main() {
 	if common.Conf.Debug {
 		logs.SetWriteLogs(logs.INFO | logs.ERR | logs.DEBUG)
 	} else {
-		logs.SetWriteLogs(logs.INFO | logs.ERR | logs.STD)
+		logs.SetWriteLogs(logs.INFO | logs.ERR)
 	}
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
