@@ -16,8 +16,8 @@ type monitor struct {
 	relay   bool
 }
 
-func NewMonitor(network, addr string, call func(msg []byte, writer *Writer)) *monitor {
-	return &monitor{network: network, addr: addr, call: call}
+func NewMonitor(relay bool, network, addr string, call func(msg []byte, writer *Writer)) *monitor {
+	return &monitor{network: network, addr: addr, call: call, relay: relay}
 }
 func (m *monitor) Start() {
 	defer func() {
