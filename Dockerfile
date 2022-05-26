@@ -38,6 +38,6 @@ RUN apk add tzdata \
 
 RUN mkdir /app
 WORKDIR /app
-COPY --from=build-env /build/search_trace /app/go_rustdesk_server
+COPY --from=build-env /build/go_rustdesk_server /app/go_rustdesk_server
 RUN chmod +x /app/go_rustdesk_server
 CMD ["/app/go_rustdesk_server"]
