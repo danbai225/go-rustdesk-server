@@ -7,6 +7,7 @@ import (
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model/model_msg"
 	"go-rustdesk-server/model/model_proto"
+	"go-rustdesk-server/my_bytes"
 	"google.golang.org/protobuf/proto"
 	"net"
 	"os"
@@ -40,10 +41,11 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 			return
 		}
 		uuid := RequestRelay.GetUuid()
+		logs.Debug(RequestRelay.Id, RequestRelay.RelayServer, RequestRelay.Token, RequestRelay.Secure, my_bytes.DecodeAddr(RequestRelay.SocketAddr))
 		if uuid != "" {
 			w, err1 := common.GetWriter(uuid, common.TCP)
 			if err1 != nil {
-				writer.SetKey(RequestRelay.GetUuid())
+				writer.SetKey(uuid)
 			} else if w != nil {
 				common.RemoveWriter(writer)
 				common.RemoveWriter(w)
