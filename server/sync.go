@@ -14,10 +14,10 @@ func handlerSyncMsg(msg []byte, writer *common.Writer) {
 		return
 	}
 	m := model_msg.Msg{}
+	err := json.Unmarshal(msg, &m)
 	if m.MsgType == 0 {
 		return
 	}
-	err := json.Unmarshal(msg, &m)
 	if err != nil {
 		logs.Err(err)
 		return
@@ -47,7 +47,7 @@ func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 		return
 	}
 	relay, err := dataSever.GetRelayByName(msg.Name)
-	if err == nil {
+	if err != nil {
 		logs.Err(err)
 		m.RegMsgR.Err = err.Error()
 		return
@@ -57,7 +57,7 @@ func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 		Port:        msg.RelayPort,
 		IP:          writer.GetAddr().GetIP(),
 		Online:      true,
-		LastRegTime: &m.Time,
+		LastRegTime: &msg.Time,
 	}
 	if relay == nil {
 		err = dataSever.AddRelay(newRelay)
@@ -72,7 +72,9 @@ func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 				List:      common.GetList(),
 			}})
 		loadRelay()
+		logs.Info("new relay ", newRelay.Name, writer.GetAddrStr())
 	} else if relay.IP == writer.GetAddr().GetIP() {
+		newRelay.Uid = relay.Uid
 		err = dataSever.UpdateRelay(newRelay)
 		if err != nil {
 			m.RegMsgR.Err = err.Error()

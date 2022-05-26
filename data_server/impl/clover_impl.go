@@ -44,6 +44,7 @@ func (c *CloverDataSever) InitDB() error {
 	}
 	c.DB = db
 	_ = c.DB.CreateCollection(TableNamePeer)
+	_ = c.DB.CreateCollection(TableNameRelay)
 	return nil
 }
 func (c *CloverDataSever) GetPeerByUUID(uuid string) (*model.Peer, error) {

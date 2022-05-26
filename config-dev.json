@@ -1,7 +1,7 @@
 {
   "whiteList": true,
   "ipList": [
-    "127.0.0.1"
+
   ],
   "debug": true,
   "reg_server":"127.0.0.1:21120",

@@ -67,17 +67,19 @@ func regRelay() {
 	var read int
 	go func() {
 		for {
-			marshal, _ := json.Marshal(model_msg.Msg{
-				Base: model_msg.Base{
-					MsgType: model_msg.RegType,
-				},
-				RegMsg: &model_msg.RegMsg{Time: time.Now(), RelayPort: common.Conf.RelayPort},
-			})
-			_, err1 := dial.Write(marshal)
-			if err1 != nil {
-				logs.Err(err1)
+			time.Sleep(time.Second * 1)
+			if dial != nil {
+				marshal, _ := json.Marshal(model_msg.Msg{
+					Base: model_msg.Base{
+						MsgType: model_msg.RegType,
+					},
+					RegMsg: &model_msg.RegMsg{Name: common.Conf.RelayName, Time: time.Now(), RelayPort: common.Conf.RelayPort},
+				})
+				_, err1 := dial.Write(marshal)
+				if err1 != nil {
+					logs.Err(err1)
+				}
 			}
-			time.Sleep(time.Second * 15)
 		}
 	}()
 	for {
@@ -102,12 +104,12 @@ func handlerSyncMsg(msg []byte, writer net.Conn) {
 		return
 	}
 	m := model_msg.Msg{}
-	if m.MsgType == 0 {
-		return
-	}
 	err := json.Unmarshal(msg, &m)
 	if err != nil {
 		logs.Err(err)
+		return
+	}
+	if m.MsgType == 0 {
 		return
 	}
 	switch m.MsgType {
@@ -119,6 +121,8 @@ func handlerSyncMsg(msg []byte, writer net.Conn) {
 		case model_msg.ExistName:
 			logs.Err(m.RegMsgR.Err)
 			os.Exit(1)
+		default:
+			//logs.Debug("注册成功")
 		}
 	case model_msg.SyncListType:
 		if m.SyncList == nil {
