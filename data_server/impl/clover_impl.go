@@ -6,6 +6,7 @@ import (
 	"github.com/ostafen/clover"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model"
+	"sync"
 )
 
 const (
@@ -15,13 +16,27 @@ const (
 )
 
 type CloverDataSever struct {
-	DB *clover.DB
+	DB        *clover.DB
+	peerLock  sync.RWMutex
+	relayLock sync.RWMutex
 }
 
 func (c *CloverDataSever) Close() error {
+	defer func() {
+		c.peerLock.Unlock()
+		c.relayLock.Unlock()
+	}()
+	c.peerLock.Lock()
+	c.relayLock.Lock()
 	return c.DB.Close()
 }
 func (c *CloverDataSever) InitDB() error {
+	defer func() {
+		c.peerLock.Unlock()
+		c.relayLock.Unlock()
+	}()
+	c.peerLock.Lock()
+	c.relayLock.Lock()
 	db, err := clover.Open("clover-db")
 	if err != nil {
 		logs.Err(err)
@@ -32,6 +47,8 @@ func (c *CloverDataSever) InitDB() error {
 	return nil
 }
 func (c *CloverDataSever) GetPeerByUUID(uuid string) (*model.Peer, error) {
+	defer c.peerLock.RUnlock()
+	c.peerLock.RLock()
 	first, err := c.DB.Query(TableNamePeer).Where(clover.Field("uuid").Eq(uuid)).FindFirst()
 	if err != nil || first == nil {
 		return nil, err
@@ -42,6 +59,8 @@ func (c *CloverDataSever) GetPeerByUUID(uuid string) (*model.Peer, error) {
 }
 
 func (c *CloverDataSever) GetPeerByID(id string) (*model.Peer, error) {
+	defer c.peerLock.RUnlock()
+	c.peerLock.RLock()
 	first, err := c.DB.Query(TableNamePeer).Where(clover.Field("id").Eq(id)).FindFirst()
 	if err != nil || first == nil {
 		return nil, err
@@ -60,6 +79,8 @@ func (c *CloverDataSever) AddPeer(peer *model.Peer) error {
 	} else if p != nil {
 		return errors.New("exist peer")
 	}
+	defer c.peerLock.Unlock()
+	c.peerLock.Lock()
 	m, err := common.ToMap(peer, "json")
 	if err != nil {
 		return err
@@ -70,6 +91,8 @@ func (c *CloverDataSever) AddPeer(peer *model.Peer) error {
 }
 
 func (c *CloverDataSever) GetPeerAll() ([]*model.Peer, error) {
+	defer c.peerLock.RUnlock()
+	c.peerLock.RLock()
 	all, err := c.DB.Query(TableNamePeer).FindAll()
 	if err != nil {
 		return nil, err
@@ -84,6 +107,8 @@ func (c *CloverDataSever) GetPeerAll() ([]*model.Peer, error) {
 }
 
 func (c *CloverDataSever) UpdatePeer(peer *model.Peer) error {
+	defer c.peerLock.Unlock()
+	c.peerLock.Lock()
 	m, err := common.ToMap(peer, "json")
 	if err != nil {
 		return err
@@ -98,6 +123,8 @@ func (c *CloverDataSever) AddPeerOrUpdate(peer *model.Peer) error {
 }
 func (c *CloverDataSever) DelPeerByUUID(uuid string) error {
 	peer, err := c.GetPeerByUUID(uuid)
+	defer c.peerLock.Unlock()
+	c.peerLock.Lock()
 	if err == nil {
 		return c.DB.Query(TableNamePeer).Where(clover.Field("_id").Eq(peer.Uid)).Delete()
 	}
@@ -114,6 +141,8 @@ func (c *CloverDataSever) AddRelay(relay *model.Relay) error {
 	} else if p != nil {
 		return errors.New("exist relay")
 	}
+	defer c.relayLock.Unlock()
+	c.relayLock.Lock()
 	m, err := common.ToMap(relay, "json")
 	if err != nil {
 		return err
@@ -129,6 +158,8 @@ func (c *CloverDataSever) AddRelayOrUpdate(relay *model.Relay) error {
 	return nil
 }
 func (c *CloverDataSever) UpdateRelay(relay *model.Relay) error {
+	defer c.relayLock.Unlock()
+	c.relayLock.Lock()
 	m, err := common.ToMap(relay, "json")
 	if err != nil {
 		return err
@@ -136,6 +167,8 @@ func (c *CloverDataSever) UpdateRelay(relay *model.Relay) error {
 	return c.DB.Save(TableNameRelay, clover.NewDocumentOf(m))
 }
 func (c *CloverDataSever) GetRelayAllOnline() ([]*model.Relay, error) {
+	defer c.relayLock.RUnlock()
+	c.relayLock.RLock()
 	all, err := c.DB.Query(TableNameRelay).Where(clover.Field("online").Eq(true)).FindAll()
 	if err != nil {
 		return nil, err
@@ -150,6 +183,8 @@ func (c *CloverDataSever) GetRelayAllOnline() ([]*model.Relay, error) {
 }
 
 func (c *CloverDataSever) GetRelayByName(name string) (*model.Relay, error) {
+	defer c.relayLock.RUnlock()
+	c.relayLock.RLock()
 	first, err := c.DB.Query(TableNameRelay).Where(clover.Field("name").Eq(name)).FindFirst()
 	if err != nil || first == nil {
 		return nil, err
