@@ -41,12 +41,14 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 			return
 		}
 		uuid := RequestRelay.GetUuid()
-		logs.Debug(RequestRelay.Id, RequestRelay.RelayServer, RequestRelay.Token, RequestRelay.Secure, my_bytes.DecodeAddr(RequestRelay.SocketAddr))
+		logs.Debug(RequestRelay.Id, uuid, RequestRelay.RelayServer, RequestRelay.Token, RequestRelay.Secure, my_bytes.DecodeAddr(RequestRelay.SocketAddr))
 		if uuid != "" {
 			w, err1 := common.GetWriter(uuid, common.TCP)
 			if err1 != nil {
+				logs.Info("not id", uuid)
 				writer.SetKey(uuid)
 			} else if w != nil {
+				logs.Info("get id", uuid)
 				common.RemoveWriter(writer)
 				common.RemoveWriter(w)
 				go writer.Copy(w)
