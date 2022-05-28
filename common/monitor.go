@@ -64,7 +64,7 @@ func (m *monitor) accept(conn net.Conn) {
 	}
 	addWriter(conn.RemoteAddr().String(), tcp, writer)
 	defer func() {
-		if writer != nil {
+		if writer != nil && writer.loop {
 			writer.Close()
 		}
 	}()
