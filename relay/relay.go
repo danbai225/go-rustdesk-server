@@ -1,9 +1,9 @@
 package relay
 
 import (
+	"encoding/json"
 	"fmt"
 	logs "github.com/danbai225/go-logs"
-	"github.com/goccy/go-json"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model/model_msg"
 	"go-rustdesk-server/model/model_proto"
@@ -17,7 +17,7 @@ import (
 
 func Start() {
 	go regRelay()
-	common.NewMonitor(true, "tcp", fmt.Sprintf(":%d", common.Conf.RelayPort), handlerMsg).Start()
+	common.NewMonitor(false, "tcp", fmt.Sprintf(":%d", common.Conf.RelayPort), handlerMsg).Start()
 }
 
 func handlerMsg(msg []byte, writer *common.Writer) {
