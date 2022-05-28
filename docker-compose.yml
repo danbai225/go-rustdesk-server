@@ -1,7 +1,7 @@
 version: "3"
 services:
   go-rustdesk-server:
-    image: danbai225/go-rustdesk-server:build
+    image: danbai225/go-rustdesk-server:latest
     container_name: go-rustdesk-server
     restart: always
     volumes:
