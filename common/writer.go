@@ -8,9 +8,9 @@ import (
 	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/os/gctx"
 	"go-rustdesk-server/model/model_msg"
+	"go-rustdesk-server/model/model_proto"
 	"go-rustdesk-server/my_bytes"
 	"google.golang.org/protobuf/proto"
-	"io"
 	"net"
 	"strconv"
 	"strings"
@@ -172,8 +172,32 @@ func (w *Writer) Copy(dst *Writer) {
 	if w._type != tcp || dst == nil || dst.tConn == nil {
 		return
 	}
-	go io.Copy(dst.tConn, w.tConn)
-	io.Copy(w.tConn, dst.tConn)
+	//go io.Copy(dst.tConn, w.tConn)
+	//io.Copy(w.tConn, dst.tConn)
+	a := func(d, s net.Conn) {
+		bytes := make([]byte, 10240)
+		for {
+			read, err := s.Read(bytes)
+			if err != nil {
+				logs.Err(err)
+				return
+			} else {
+				message := model_proto.Message{}
+				err = proto.Unmarshal(bytes, &message)
+				if err == nil {
+					logs.Info(message.Union)
+				}
+			}
+			write, err := d.Write(bytes[:read])
+			if err != nil || write != read {
+				logs.Err(err)
+				return
+			}
+			logs.Info(write)
+		}
+	}
+	go a(dst.tConn, w.tConn)
+	a(w.tConn, dst.tConn)
 }
 func (w *Writer) SendMsg(message proto.Message) {
 	if message == nil {

@@ -17,7 +17,7 @@ import (
 
 func Start() {
 	go regRelay()
-	common.NewMonitor(false, "tcp", fmt.Sprintf(":%d", common.Conf.RelayPort), handlerMsg).Start()
+	common.NewMonitor(true, "tcp", fmt.Sprintf(":%d", common.Conf.RelayPort), handlerMsg).Start()
 }
 
 func handlerMsg(msg []byte, writer *common.Writer) {
