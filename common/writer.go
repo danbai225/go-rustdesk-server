@@ -172,6 +172,10 @@ func (w *Writer) Copy(dst *Writer) {
 	if w._type != tcp || dst == nil || dst.tConn == nil {
 		return
 	}
+	defer func() {
+		dst.Close()
+		w.Close()
+	}()
 	go io.Copy(dst.tConn, w.tConn)
 	io.Copy(w.tConn, dst.tConn)
 }
