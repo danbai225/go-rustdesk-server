@@ -45,17 +45,17 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		if uuid != "" {
 			w, err1 := common.GetWriter(uuid, common.TCP)
 			if err1 != nil {
-				logs.Info("not id", uuid)
+				logs.Debug("not id", uuid)
 				writer.SetKey(uuid)
 			} else if w != nil {
-				logs.Info("get id", uuid)
+				logs.Debug("get id", uuid)
 				common.RemoveWriter(writer)
 				common.RemoveWriter(w)
 				go writer.Copy(w)
 			}
 		}
 	default:
-		logs.Info(writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
+		logs.Debug(writer.GetAddrStr(), reflect.TypeOf(message.Union).String())
 	}
 }
 
