@@ -1,10 +1,12 @@
 # go-rustdesk-server
 
+[<a href="README-English.md">English</a>] | [<a href="README.md">中文</a>]
+
 rustdesk远程桌面软件，服务端golang实现。
 
 参考[官方实现](https://github.com/rustdesk/rustdesk-server)
 
-开发中~
+更多功能开发中~
 
 # 已实现功能
 
