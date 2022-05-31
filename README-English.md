@@ -37,6 +37,8 @@ Execute `docker-compose up -d`.
 
 Please open the corresponding port and preferably use the default port.
 
+Use `docker-compose logs` to view the generated keys for encrypted connections
+
 ## If you want to start only relay
 
 Change the start parameters in `docker-compose.yml`
@@ -48,5 +50,11 @@ and make sure the relay configuration has the value
 ## If you want to start only the server
 
 Remove the value of the relay configuration from `config.json`
+
+# More features to be developed later
+
+- Support for more relay server assignments
+- webapi?
+- websocket connection
 
 Translated with www.DeepL.com/Translator (free version)

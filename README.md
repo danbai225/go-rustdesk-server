@@ -37,6 +37,8 @@ relay - 在无法穿透情况下使用的中继服务
 
 请开放对应端口且最好使用默认端口。
 
+使用`docker-compose logs`查看生成的key用于加密连接
+
 ## 如需只启动relay
 
 在`docker-compose.yml`修改启动参数
@@ -49,7 +51,7 @@ relay - 在无法穿透情况下使用的中继服务
 
 去掉`config.json`中relay的配置的值
 
-# 更多功能
+# 更多功能 后续开发
 
 - 支持更多中继服务器的分配
 - webapi？
