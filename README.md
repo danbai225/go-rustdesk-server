@@ -48,3 +48,10 @@ relay - 在无法穿透情况下使用的中继服务
 ## 如需只启动server
 
 去掉`config.json`中relay的配置的值
+
+# 更多功能
+
+- 支持更多中继服务器的分配
+- webapi？
+- websocket连接
+
