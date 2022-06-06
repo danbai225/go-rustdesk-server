@@ -7,6 +7,7 @@ import (
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model"
 	"sync"
+	"time"
 )
 
 const (
@@ -178,7 +179,15 @@ func (c *CloverDataSever) GetRelayAllOnline() ([]*model.Relay, error) {
 	for _, document := range all {
 		p := &model.Relay{}
 		_ = document.Unmarshal(p)
-		peers = append(peers, p)
+		if p.LastRegTime.Add(time.Second * 60).After(time.Now()) {
+			peers = append(peers, p)
+		} else {
+			p.Online = false
+			err = c.UpdateRelay(p)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 	return peers, err
 }

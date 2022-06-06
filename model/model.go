@@ -19,4 +19,9 @@ type Relay struct {
 	IP          string     `json:"ip"`
 	Online      bool       `json:"online"`
 	LastRegTime *time.Time `json:"last_reg_time"`
+	Download    uint       `json:"download"`
+	Upload      uint       `json:"upload"`
+	Ping        uint       `json:"ping"`
+	Cpu         uint       `json:"cpu"`
+	NetFlow     float64    `json:"net_flow"`
 }

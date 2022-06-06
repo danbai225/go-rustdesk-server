@@ -58,6 +58,11 @@ func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 		IP:          writer.GetAddr().GetIP(),
 		Online:      true,
 		LastRegTime: &msg.Time,
+		Download:    msg.Download,
+		Upload:      msg.Upload,
+		Ping:        msg.Ping,
+		Cpu:         msg.Cpu,
+		NetFlow:     msg.NetFlow,
 	}
 	if relay == nil {
 		err = dataSever.AddRelay(newRelay)
@@ -72,7 +77,7 @@ func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 				List:      common.GetList(),
 			}})
 		loadRelay()
-		logs.Info("new relay ", newRelay.Name, writer.GetAddrStr())
+		logs.Info("new relay", newRelay.Name, writer.GetAddrStr())
 	} else if relay.IP == writer.GetAddr().GetIP() {
 		newRelay.Uid = relay.Uid
 		err = dataSever.UpdateRelay(newRelay)

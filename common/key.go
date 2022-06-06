@@ -54,7 +54,7 @@ func GetSignPK(version, id string, peerPK []byte) []byte {
 	if version == "" || id == "" {
 		return bytes
 	}
-	logs.Info(id, peerPK)
+	logs.Debug(id, peerPK)
 	marshal, _ := proto.Marshal(&model_proto.IdPk{
 		Id: id,
 		Pk: peerPK,

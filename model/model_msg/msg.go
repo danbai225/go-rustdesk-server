@@ -19,6 +19,11 @@ type RegMsg struct {
 	Name      string    `json:"name"`
 	Time      time.Time `json:"time"`
 	RelayPort uint16    `json:"relay_port"`
+	Download  uint      `json:"download"`
+	Upload    uint      `json:"upload"`
+	Ping      uint      `json:"ping"`
+	Cpu       uint      `json:"cpu"`
+	NetFlow   float64   `json:"net_flow"`
 }
 type RegMsgR struct {
 	Err string `json:"err"`

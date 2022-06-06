@@ -7,12 +7,14 @@ import (
 	"github.com/gogf/gf/v2/container/gring"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/data_server"
+	"go-rustdesk-server/model"
+	"math/rand"
 )
 
 var dataSever data_server.DataSever
 var queue = gqueue.New()
 var r = gring.New(32, true)
-var rendezvousServers = []string{"1.14.47.89"}
+var rendezvousServers = make([]string, 0)
 var serial = int32(1)
 
 func Start() {
@@ -49,4 +51,23 @@ func loadRelay() {
 			rendezvousServers = append(rendezvousServers, fmt.Sprintf("%s:%d", relay.IP, relay.Port))
 		}
 	}
+}
+
+//获取一个中继服务器
+func getRelay() string {
+	online, _ := dataSever.GetRelayAllOnline()
+	if len(online) != len(rendezvousServers) {
+		loadRelay()
+	}
+	var Rrelay *model.Relay
+	for _, relay := range online {
+		if relay.Cpu < 60 && (float64(relay.Upload)-relay.NetFlow) > (float64(relay.Upload)*0.1) {
+			Rrelay = relay
+			break
+		}
+	}
+	if Rrelay == nil {
+		Rrelay = online[rand.Intn(len(online))]
+	}
+	return fmt.Sprintf("%s:%d", Rrelay.IP, Rrelay.Port)
 }

@@ -53,7 +53,6 @@ Remove the value of the relay configuration from `config.json`
 
 # More features to be developed later
 
-- Support for more relay server assignments
 - webapi?
 - websocket connection
 

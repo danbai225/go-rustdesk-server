@@ -74,27 +74,28 @@ func regRelay() {
 	var dial net.Conn
 	var err error
 	var read int
-	go func() {
-		for {
-			time.Sleep(time.Second * 1)
-			if dial != nil {
-				marshal, _ := json.Marshal(model_msg.Msg{
-					Base: model_msg.Base{
-						MsgType: model_msg.RegType,
-					},
-					RegMsg: &model_msg.RegMsg{Name: common.Conf.RelayName, Time: time.Now(), RelayPort: common.Conf.RelayPort},
-				})
-				_, err1 := dial.Write(marshal)
-				if err1 != nil {
-					logs.Err(err1)
-				}
-			}
-		}
-	}()
+	d, u, p := testSpeed()
 	for {
 		dial, err = net.Dial("udp", common.Conf.RegServer)
 		if err != nil {
+			dial = nil
 			logs.Err(err)
+		} else {
+			go func() {
+				for dial != nil {
+					marshal, _ := json.Marshal(model_msg.Msg{
+						Base: model_msg.Base{
+							MsgType: model_msg.RegType,
+						},
+						RegMsg: &model_msg.RegMsg{Name: common.Conf.RelayName, Time: time.Now(), RelayPort: common.Conf.RelayPort, Upload: u, Download: d, Ping: p, Cpu: cpuTest(), NetFlow: netFlow()},
+					})
+					_, err1 := dial.Write(marshal)
+					if err1 != nil {
+						logs.Err(err1)
+					}
+					time.Sleep(12 * time.Second)
+				}
+			}()
 		}
 		bytes := make([]byte, 1024)
 		for err == nil {

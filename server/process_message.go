@@ -148,7 +148,7 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 	} else {
 		rendezvousMessage := model_proto.NewRendezvousMessage(&model_proto.FetchLocalAddr{
 			SocketAddr:  my_bytes.EncodeAddr(writer.GetAddrStr()),
-			RelayServer: rendezvousServers[0],
+			RelayServer: getRelay(),
 		})
 		marshal, err2 := proto.Marshal(rendezvousMessage)
 		if err2 != nil {
@@ -242,7 +242,7 @@ func RendezvousMessagePunchHoleSent(message *model_proto.PunchHoleSent, writer *
 	res := &model_proto.PunchHoleResponse{
 		SocketAddr:  my_bytes.EncodeAddr(writer.GetAddrStr()),
 		Pk:          common.GetSignPK(message.GetVersion(), message.GetId(), peer.PK),
-		RelayServer: rendezvousServers[0],
+		RelayServer: getRelay(),
 		Union: &model_proto.PunchHoleResponse_NatType{
 			NatType: message.NatType,
 		},
