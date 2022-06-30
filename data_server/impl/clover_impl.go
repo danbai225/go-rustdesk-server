@@ -169,12 +169,12 @@ func (c *CloverDataSever) UpdateRelay(relay *model.Relay) error {
 	return c.DB.Save(TableNameRelay, clover.NewDocumentOf(m))
 }
 func (c *CloverDataSever) GetRelayAllOnline() ([]*model.Relay, error) {
-	defer c.relayLock.RUnlock()
 	c.relayLock.RLock()
 	all, err := c.DB.Query(TableNameRelay).Where(clover.Field("online").Eq(true)).FindAll()
 	if err != nil {
 		return nil, err
 	}
+	c.relayLock.RUnlock()
 	peers := make([]*model.Relay, 0)
 	for _, document := range all {
 		p := &model.Relay{}

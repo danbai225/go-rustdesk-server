@@ -132,6 +132,12 @@ func RendezvousMessageSoftwareUpdate(message *model_proto.SoftwareUpdate) *model
 }
 func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, writer *common.Writer) *model_proto.PunchHoleResponse {
 	res := &model_proto.PunchHoleResponse{}
+	if common.Conf.MustKey {
+		if message.LicenceKey != common.GetPkStr() {
+			res.Failure = model_proto.PunchHoleResponse_LICENSE_MISMATCH
+			return res
+		}
+	}
 	peer, err := dataSever.GetPeerByID(message.Id)
 	if err != nil {
 		logs.Debug(err)
@@ -146,7 +152,6 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 	if err != nil {
 		res.Failure = model_proto.PunchHoleResponse_OFFLINE
 	} else {
-		logs.Info("DD", message.Token, message.LicenceKey)
 		rendezvousMessage := model_proto.NewRendezvousMessage(&model_proto.FetchLocalAddr{
 			SocketAddr:  my_bytes.EncodeAddr(writer.GetAddrStr()),
 			RelayServer: getRelay(),

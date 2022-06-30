@@ -1,8 +1,8 @@
 {
-  "whiteList": true,
+  "whiteList": false,
   "ipList": [
-    "127.0.0.1"
   ],
+  "must_key": true,
   "debug": false,
   "reg_server":"127.0.0.1:21120",
   "relay_name":"go_rust_desk_relay",

@@ -61,3 +61,6 @@ func GetSignPK(version, id string, peerPK []byte) []byte {
 	})
 	return Sign(marshal)
 }
+func GetPkStr() string {
+	return pkStr
+}

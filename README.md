@@ -27,7 +27,7 @@ relay - 在无法穿透情况下使用的中继服务
 - relay_name relay名称，不为空时会启动relay服务 仅relay配置
 - server_port 服务端启动端口 仅server配置
 - reg_port 服务端启动的relay注册监听端口 仅server配置
-
+- must_key 必须带key才能连接
 # docker-compose安装
 
 下载仓库中的`docker-compose.yml`、`config.json`

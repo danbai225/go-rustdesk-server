@@ -27,6 +27,7 @@ relay - relay service to be used in case of impenetration
 - relay_name relay name, if it is not empty, the relay service will be started.
 - server_port Server start port Only server configuration
 - reg_port The port where the relay is registered to listen when the server is started.
+- must_key key is required to Connect
 
 # docker-compose installation
 

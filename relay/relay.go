@@ -40,9 +40,13 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		if RequestRelay == nil {
 			return
 		}
+		if common.Conf.MustKey {
+			if RequestRelay.LicenceKey != common.GetPkStr() {
+				return
+			}
+		}
 		uuid := RequestRelay.GetUuid()
 		logs.Debug(RequestRelay.Id, uuid, RequestRelay.RelayServer, RequestRelay.Token, RequestRelay.Secure, my_bytes.DecodeAddr(RequestRelay.SocketAddr))
-		logs.Info("DD", RequestRelay.Token, RequestRelay.LicenceKey)
 		if uuid != "" {
 			w, err1 := common.GetWriter(uuid, common.TCP)
 			if err1 != nil {
