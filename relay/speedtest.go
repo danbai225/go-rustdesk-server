@@ -17,7 +17,7 @@ func testSpeed() (Download, Upload, pingR uint) {
 	targets, _ := serverList.FindServer([]int{})
 	server := strings.Split(common.Conf.RegServer, ":")
 	for _, s := range targets {
-		_ = s.DownloadTest(false)
+		//_ = s.DownloadTest(false)
 		_ = s.UploadTest(false)
 		return uint(s.DLSpeed), uint(s.ULSpeed), ping(server[0])
 	}
