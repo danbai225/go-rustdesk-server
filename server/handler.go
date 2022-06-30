@@ -121,7 +121,7 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		}
 		response = model_proto.NewRendezvousMessage(RendezvousMessagePunchHoleSent(PunchHoleSent, writer))
 	case model_proto.TypeRendezvousMessageConfigureUpdate:
-		//请求打洞
+		//配置更新
 		ConfigUpdate := message.GetConfigureUpdate()
 		if ConfigUpdate == nil {
 			return

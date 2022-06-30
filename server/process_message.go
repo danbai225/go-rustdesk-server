@@ -146,6 +146,7 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 	if err != nil {
 		res.Failure = model_proto.PunchHoleResponse_OFFLINE
 	} else {
+		logs.Info("DD", message.Token, message.LicenceKey)
 		rendezvousMessage := model_proto.NewRendezvousMessage(&model_proto.FetchLocalAddr{
 			SocketAddr:  my_bytes.EncodeAddr(writer.GetAddrStr()),
 			RelayServer: getRelay(),
