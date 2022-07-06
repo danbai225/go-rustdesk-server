@@ -59,6 +59,10 @@ func getRelay() string {
 	if len(online) != len(rendezvousServers) {
 		loadRelay()
 	}
+	if len(online) == 0 {
+		logs.Err("NoRegisteredRelayServer")
+		return ""
+	}
 	var Rrelay *model.Relay
 	for _, relay := range online {
 		if relay.Cpu < 60 && (float64(relay.Upload)-relay.NetFlow) > (float64(relay.Upload)*0.1) {
