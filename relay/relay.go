@@ -114,6 +114,9 @@ func regRelay() {
 		time.Sleep(time.Second * 15)
 	}
 }
+
+var firstReg = false
+
 func handlerSyncMsg(msg []byte, writer net.Conn) {
 	if len(msg) == 0 {
 		return
@@ -137,7 +140,10 @@ func handlerSyncMsg(msg []byte, writer net.Conn) {
 			logs.Err(m.RegMsgR.Err)
 			os.Exit(1)
 		default:
-			//logs.Debug("注册成功")
+			if !firstReg {
+				logs.Info("注册成功")
+				firstReg = true
+			}
 		}
 	case model_msg.SyncListType:
 		if m.SyncList == nil {
