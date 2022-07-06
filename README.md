@@ -23,7 +23,7 @@ relay - 在无法穿透情况下使用的中继服务
 - whiteList 是否启用白名单模式，false为黑名单
 - ipList ip名单列表，黑名单模式下在内的ip无法连接
 - debug 开发模式，为true会输出debug日志
-- reg_server relay注册时服务端地址 仅relay配置
+- reg_server relay注册时服务端地址填写公网地址 仅relay配置
 - relay_name relay名称，不为空时会启动relay服务 仅relay配置
 - server_port 服务端启动端口 仅server配置
 - reg_port 服务端启动的relay注册监听端口 仅server配置
