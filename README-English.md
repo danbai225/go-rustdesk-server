@@ -6,7 +6,7 @@ rustdesk remote desktop software, server-side golang implementation.
 
 Reference [official implementation](https://github.com/rustdesk/rustdesk-server)
 
-More features are under development~
+This project does not guarantee availability, please move to the official open source server.
 
 # Implemented features
 
@@ -51,10 +51,3 @@ and make sure the relay configuration has the value
 ## If you want to start only the server
 
 Remove the value of the relay configuration from `config.json`
-
-# More features to be developed later
-
-- webapi?
-- websocket connection
-
-Translated with www.DeepL.com/Translator (free version)

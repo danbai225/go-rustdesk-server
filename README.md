@@ -5,8 +5,7 @@
 rustdesk远程桌面软件，服务端golang实现。
 
 参考[官方实现](https://github.com/rustdesk/rustdesk-server)
-
-更多功能开发中~
+本项目不保障可用性，请移步官方开源服务器。
 
 # 已实现功能
 
@@ -50,9 +49,4 @@ relay - 在无法穿透情况下使用的中继服务
 ## 如需只启动server
 
 去掉`config.json`中relay的配置的值
-
-# 更多功能 后续开发
-
-- webapi？
-- websocket连接
 
