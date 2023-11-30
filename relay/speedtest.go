@@ -12,13 +12,12 @@ import (
 )
 
 func testSpeed() (Download, Upload, pingR uint) {
-	user, _ := sp.FetchUserInfo()
-	serverList, _ := sp.FetchServers(user)
+	serverList, _ := sp.FetchServers()
 	targets, _ := serverList.FindServer([]int{})
 	server := strings.Split(common.Conf.RegServer, ":")
 	for _, s := range targets {
 		//_ = s.DownloadTest(false)
-		_ = s.UploadTest(false)
+		_ = s.UploadTest()
 		return uint(s.DLSpeed), uint(s.ULSpeed), ping(server[0])
 	}
 	return

@@ -16,6 +16,7 @@ var (
 	TypeRendezvousMessageRelayResponse    = reflect.TypeOf(&RendezvousMessage_RelayResponse{}).String()
 	TypeRendezvousMessagePunchHoleSent    = reflect.TypeOf(&RendezvousMessage_PunchHoleSent{}).String()
 	TypeRendezvousMessageConfigureUpdate  = reflect.TypeOf(&RendezvousMessage_ConfigureUpdate{}).String()
+	TypeRendezvousMessageOnlineRequest    = reflect.TypeOf(&RendezvousMessage_OnlineRequest{}).String()
 )
 
 var typeMap map[string]reflect.Type

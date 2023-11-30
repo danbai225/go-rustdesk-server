@@ -264,3 +264,20 @@ func RendezvousMessagePunchHoleSent(message *model_proto.PunchHoleSent, writer *
 func RendezvousMessageConfigureUpdate(message *model_proto.ConfigUpdate) {
 	logs.Debug(message.Serial, message.RendezvousServers)
 }
+func RendezvousMessageOnlineRequest(message *model_proto.OnlineRequest) *model_proto.OnlineResponse {
+	states := make([]byte, (len(message.GetPeers())+7)/8)
+	for i, peerID := range message.GetPeers() {
+		peer, err := dataSever.GetPeerByID(peerID)
+		if err != nil {
+			continue
+		}
+		statesIdx := i / 8
+		bitIdx := 7 - i%8
+		if time.Since(*peer.LastRegTime) < time.Millisecond*30000 {
+			states[statesIdx] |= 0x01 << bitIdx
+		}
+	}
+	return &model_proto.OnlineResponse{
+		States: states,
+	}
+}

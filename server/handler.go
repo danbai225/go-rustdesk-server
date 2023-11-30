@@ -127,6 +127,13 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 			return
 		}
 		RendezvousMessageConfigureUpdate(ConfigUpdate)
+	case model_proto.TypeRendezvousMessageOnlineRequest:
+		//在线请求
+		OnlineRequest := message.GetOnlineRequest()
+		if OnlineRequest == nil {
+			return
+		}
+		response = model_proto.NewRendezvousMessage(RendezvousMessageOnlineRequest(OnlineRequest))
 	default:
 		logs.Debug(reflect.TypeOf(message.Union).String())
 	}

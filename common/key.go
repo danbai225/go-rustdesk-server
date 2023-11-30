@@ -6,7 +6,6 @@ import (
 	logs "github.com/danbai225/go-logs"
 	"go-rustdesk-server/model/model_proto"
 	"google.golang.org/protobuf/proto"
-	"io/ioutil"
 	"os"
 )
 
@@ -16,16 +15,16 @@ var sk []byte
 
 func genKey() error {
 	key, privateKey, _ := ed25519.GenerateKey(nil)
-	err := ioutil.WriteFile(keyPath, privateKey, os.ModePerm)
+	err := os.WriteFile(keyPath, privateKey, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(keyPath+".pub", key, os.ModePerm)
+	err = os.WriteFile(keyPath+".pub", key, os.ModePerm)
 	return err
 }
 func LoadKey() {
 	if !Exists(keyPath) {
-		os.MkdirAll("key", os.ModePerm)
+		_ = os.MkdirAll("key", os.ModePerm)
 		err := genKey()
 		if err != nil {
 			logs.Err("gen key err :", err)
@@ -33,12 +32,12 @@ func LoadKey() {
 		}
 	}
 	var err error
-	sk, err = ioutil.ReadFile(keyPath)
+	sk, err = os.ReadFile(keyPath)
 	if err != nil {
 		logs.Err("open key err:", err)
 		return
 	}
-	pk, err = ioutil.ReadFile(keyPath + ".pub")
+	pk, err = os.ReadFile(keyPath + ".pub")
 	if err != nil {
 		logs.Err("open key err:", err)
 		return
