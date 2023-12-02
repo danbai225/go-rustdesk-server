@@ -268,7 +268,7 @@ func RendezvousMessageOnlineRequest(message *model_proto.OnlineRequest) *model_p
 	states := make([]byte, (len(message.GetPeers())+7)/8)
 	for i, peerID := range message.GetPeers() {
 		peer, err := dataSever.GetPeerByID(peerID)
-		if err != nil {
+		if err != nil || peer == nil {
 			continue
 		}
 		statesIdx := i / 8
