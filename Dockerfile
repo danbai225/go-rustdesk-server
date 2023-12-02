@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine AS build-env
+FROM golang:1.20-alpine AS build-env
 MAINTAINER DanBai
 
 #修改镜像源为国内
