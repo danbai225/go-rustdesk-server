@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	logs "github.com/danbai225/go-logs"
-	"github.com/gogf/gf/v2/container/gqueue"
 	"github.com/gogf/gf/v2/container/gring"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/data_server"
@@ -12,7 +11,6 @@ import (
 )
 
 var dataSever data_server.DataSever
-var queue = gqueue.New()
 var r = gring.New(32, true)
 var rendezvousServers = make([]string, 0)
 var serial = int32(1)
@@ -32,7 +30,7 @@ func Start() {
 	common.NewMonitor(false, "tcp", fmt.Sprintf(":%d", common.Conf.ServerPort), handlerMsg).Start()
 }
 
-//黑名单检测
+// 黑名单检测
 func blacklistDetection(id string, addr *common.Addr) bool {
 	in := common.InList(addr.GetIP())
 	if common.Conf.WhiteList && in {
@@ -53,7 +51,7 @@ func loadRelay() {
 	}
 }
 
-//获取一个中继服务器
+// 获取一个中继服务器
 func getRelay() string {
 	online, _ := dataSever.GetRelayAllOnline()
 	if len(online) != len(rendezvousServers) {
@@ -63,15 +61,15 @@ func getRelay() string {
 		logs.Err("NoRegisteredRelayServer")
 		return ""
 	}
-	var Rrelay *model.Relay
+	var Relay *model.Relay
 	for _, relay := range online {
 		if relay.Cpu < 60 && (float64(relay.Upload)-relay.NetFlow) > (float64(relay.Upload)*0.1) {
-			Rrelay = relay
+			Relay = relay
 			break
 		}
 	}
-	if Rrelay == nil {
-		Rrelay = online[rand.Intn(len(online))]
+	if Relay == nil {
+		Relay = online[rand.Intn(len(online))]
 	}
-	return fmt.Sprintf("%s:%d", Rrelay.IP, Rrelay.Port)
+	return fmt.Sprintf("%s:%d", Relay.IP, Relay.Port)
 }

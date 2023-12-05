@@ -64,7 +64,7 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 	}
 }
 
-//黑名单检测
+// 黑名单检测
 func blacklistDetection(addr *common.Addr) bool {
 	in := common.InList(addr.GetIP())
 	if common.Conf.WhiteList && in {
@@ -92,7 +92,7 @@ func regRelay() {
 						Base: model_msg.Base{
 							MsgType: model_msg.RegType,
 						},
-						RegMsg: &model_msg.RegMsg{Name: common.Conf.RelayName, Time: time.Now(), RelayPort: common.Conf.RelayPort, Upload: u, Download: d, Ping: p, Cpu: cpuTest(), NetFlow: netFlow()},
+						RegMsg: &model_msg.RegMsg{IP: common.Conf.RelayIp, Name: common.Conf.RelayName, Time: time.Now(), RelayPort: common.Conf.RelayPort, Upload: u, Download: d, Ping: p, Cpu: cpuTest(), NetFlow: netFlow()},
 					})
 					_, err1 := dial.Write(marshal)
 					if err1 != nil {

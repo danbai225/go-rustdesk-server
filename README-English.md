@@ -28,6 +28,7 @@ relay - relay service to be used in case of impenetration
 - server_port Server start port Only server configuration
 - reg_port The port where the relay is registered to listen when the server is started.
 - must_key key is required to Connect
+- relay_ip ip of RelayService onlyRelayConfiguration
 
 # docker-compose installation
 

@@ -24,6 +24,7 @@ type RegMsg struct {
 	Ping      uint      `json:"ping"`
 	Cpu       uint      `json:"cpu"`
 	NetFlow   float64   `json:"net_flow"`
+	IP        string    `json:"ip"`
 }
 type RegMsgR struct {
 	Err string `json:"err"`

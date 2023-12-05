@@ -1,12 +1,12 @@
 {
   "whiteList": false,
-  "ipList": [
-  ],
+  "ipList": [],
   "must_key": true,
   "debug": false,
   "reg_server":"127.0.0.1:21120",
   "relay_name":"go_rust_desk_relay",
   "server_port": 21116,
   "relay_port":21117,
-  "reg_port": 21120
+  "reg_port": 21120,
+  "relay_ip": "127.0.0.1"
 }

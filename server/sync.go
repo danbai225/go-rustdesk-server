@@ -8,7 +8,7 @@ import (
 	"go-rustdesk-server/model/model_msg"
 )
 
-//同步服务
+// 同步服务
 func handlerSyncMsg(msg []byte, writer *common.Writer) {
 	if len(msg) == 0 {
 		return
@@ -33,7 +33,7 @@ func handlerSyncMsg(msg []byte, writer *common.Writer) {
 	}
 }
 
-//regRelay
+// regRelay
 func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 	m := model_msg.Msg{
 		Base:    model_msg.Base{MsgType: model_msg.RegRType},
@@ -52,10 +52,14 @@ func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 		m.RegMsgR.Err = err.Error()
 		return
 	}
+	ip := writer.GetAddr().GetIP()
+	if msg.IP != "" {
+		ip = msg.IP
+	}
 	newRelay := &model.Relay{
 		Name:        msg.Name,
 		Port:        msg.RelayPort,
-		IP:          writer.GetAddr().GetIP(),
+		IP:          ip,
 		Online:      true,
 		LastRegTime: &msg.Time,
 		Download:    msg.Download,
@@ -78,7 +82,7 @@ func regRelay(msg *model_msg.RegMsg, writer *common.Writer) {
 			}})
 		loadRelay()
 		logs.Info("new relay", newRelay.Name, writer.GetAddrStr())
-	} else if relay.IP == writer.GetAddr().GetIP() {
+	} else if relay.IP == ip {
 		newRelay.Uid = relay.Uid
 		err = dataSever.UpdateRelay(newRelay)
 		if err != nil {
