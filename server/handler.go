@@ -15,28 +15,31 @@ type ringMsg struct {
 	TimeOut uint32
 	InsTime time.Time
 	Val     interface{}
+	Writer  *common.Writer
 }
 
-func getMsgForm(id, Type string, timeOut uint) interface{} {
+func getMsgForm(id, Type string, timeOut uint) (*common.Writer, interface{}) {
 	if timeOut == 0 {
 		timeOut = 3
 	}
-	after := time.After(time.Second * time.Duration(timeOut))
+	timer := time.NewTimer(time.Second * time.Duration(timeOut))
+	defer timer.Stop()
+
 	for {
 		select {
-		case <-after:
-			return nil
+		case <-timer.C:
+			return nil, nil
 		default:
 			next := r.Next()
 			val := next.Val()
 			now := time.Now()
 			if val != nil {
 				if v, ok := val.(*ringMsg); ok {
-					if now.Add(time.Second * time.Duration(v.TimeOut)).Before(now) {
+					if v.InsTime.Add(time.Second * time.Duration(v.TimeOut)).Before(now) {
 						next.Set(nil)
 					} else if v.ID == id && v.Type == Type {
 						next.Set(nil)
-						return v.Val
+						return v.Writer, v.Val
 					}
 				}
 			}
@@ -112,14 +115,14 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		if RelayResponse == nil {
 			return
 		}
-		RendezvousMessageRelayResponse(RelayResponse)
+		RendezvousMessageRelayResponse(writer, RelayResponse)
 	case model_proto.TypeRendezvousMessagePunchHoleSent:
 		//请求打洞
 		PunchHoleSent := message.GetPunchHoleSent()
 		if PunchHoleSent == nil {
 			return
 		}
-		response = model_proto.NewRendezvousMessage(RendezvousMessagePunchHoleSent(PunchHoleSent, writer))
+		RendezvousMessagePunchHoleSent(PunchHoleSent, writer)
 	case model_proto.TypeRendezvousMessageConfigureUpdate:
 		//配置更新
 		ConfigUpdate := message.GetConfigureUpdate()

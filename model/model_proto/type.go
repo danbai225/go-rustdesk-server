@@ -33,6 +33,8 @@ func init() {
 		"RendezvousMessage_RelayResponse":        reflect.TypeOf(&RendezvousMessage_RelayResponse{}).Elem(),
 		"RendezvousMessage_ConfigUpdate":         reflect.TypeOf(&RendezvousMessage_ConfigureUpdate{}).Elem(),
 		"RendezvousMessage_OnlineResponse":       reflect.TypeOf(&RendezvousMessage_OnlineResponse{}).Elem(),
+		"RendezvousMessage_PunchHoleSent":        reflect.TypeOf(&RendezvousMessage_PunchHoleSent{}).Elem(),
+		"RendezvousMessage_PunchHole":            reflect.TypeOf(&RendezvousMessage_PunchHole{}).Elem(),
 	}
 }
 

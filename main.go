@@ -23,8 +23,10 @@ func main() {
 		go server.Start()
 	}
 	if common.Conf.Debug {
+		logs.SetLevel(logs.DEBUG)
 		logs.SetWriteLogs(logs.INFO | logs.ERR | logs.DEBUG)
 	} else {
+		logs.SetLevel(logs.INFO)
 		logs.SetWriteLogs(logs.INFO | logs.ERR)
 	}
 	sigs := make(chan os.Signal, 1)

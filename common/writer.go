@@ -56,12 +56,8 @@ func (a *Addr) GetPort() uint32 {
 	return a.port
 }
 func (a *Addr) Parsing(addr string) {
-	split := strings.Split(addr, ":")
-	if len(split) != 2 {
-		return
-	}
-	a.ip = split[0]
-	p, _ := strconv.ParseUint(split[1], 10, 32)
+	ip, p := getIp(addr)
+	a.ip = ip
 	a.port = uint32(p)
 }
 func (w *Writer) Type() string {
@@ -213,6 +209,17 @@ func (w *Writer) Close() {
 	}
 	w.remove()
 }
+func (w *Writer) SelfAddr() string {
+	switch w._type {
+	case udp:
+		ip, _ := getIp(w.uConn.LocalAddr().String())
+		return ip
+	case tcp:
+		ip, _ := getIp(w.tConn.RemoteAddr().String())
+		return ip
+	}
+	return ""
+}
 func GetWriter(key, _type string) (*Writer, error) {
 	mk := ""
 	switch _type {
@@ -246,4 +253,13 @@ func addWriter(key, _type string, w *Writer) {
 }
 func RemoveWriter(w *Writer) {
 	w.remove()
+}
+func getIp(addr string) (string, uint64) {
+	split := strings.Split(addr, ":")
+	if len(split) != 2 {
+		return "", 0
+	}
+	ip := split[0]
+	p, _ := strconv.ParseUint(split[1], 10, 32)
+	return ip, p
 }

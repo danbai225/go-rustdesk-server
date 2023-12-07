@@ -3,7 +3,7 @@ module go-rustdesk-server
 go 1.20
 
 require (
-	github.com/danbai225/go-logs v0.3.1
+	github.com/danbai225/go-logs v0.3.2
 	github.com/go-ping/ping v1.1.0
 	github.com/gogf/gf/v2 v2.5.7
 	github.com/ostafen/clover v1.2.0
