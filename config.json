@@ -8,5 +8,6 @@
   "server_port": 21116,
   "relay_port":21117,
   "reg_port": 21120,
-  "relay_ip": "127.0.0.1"
+  "relay_ip": "127.0.0.1",
+  "web_port": 21114
 }

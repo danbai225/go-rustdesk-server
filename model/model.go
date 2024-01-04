@@ -25,3 +25,8 @@ type Relay struct {
 	Cpu         uint       `json:"cpu"`
 	NetFlow     float64    `json:"net_flow"`
 }
+type User struct {
+	Uid      string `json:"_id"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}

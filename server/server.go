@@ -4,6 +4,7 @@ import (
 	"fmt"
 	logs "github.com/danbai225/go-logs"
 	"github.com/gogf/gf/v2/container/gring"
+	"go-rustdesk-server/api_server"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/data_server"
 	"go-rustdesk-server/model"
@@ -27,7 +28,8 @@ func Start() {
 	go common.NewMonitor(false, "udp", fmt.Sprintf(":%d", common.Conf.ServerPort), handlerMsg).Start()
 	go common.NewMonitor(false, "tcp", fmt.Sprintf(":%d", common.Conf.ServerPort-1), handlerMsg).Start()
 	go common.NewMonitor(false, "udp", fmt.Sprintf(":%d", common.Conf.RegPort), handlerSyncMsg).Start()
-	common.NewMonitor(false, "tcp", fmt.Sprintf(":%d", common.Conf.ServerPort), handlerMsg).Start()
+	go common.NewMonitor(false, "tcp", fmt.Sprintf(":%d", common.Conf.ServerPort), handlerMsg).Start()
+	api_server.Start()
 }
 
 // 黑名单检测

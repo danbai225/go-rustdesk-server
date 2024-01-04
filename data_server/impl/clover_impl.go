@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	objectIdField  = "_id"
 	TableNamePeer  = "Peer"
 	TableNameRelay = "Relay"
+	TableNameUser  = "User"
 )
 
 type CloverDataSever struct {
@@ -123,15 +123,6 @@ func (c *CloverDataSever) AddPeerOrUpdate(peer *model.Peer) error {
 	}
 	return nil
 }
-func (c *CloverDataSever) DelPeerByUUID(uuid string) error {
-	peer, err := c.GetPeerByUUID(uuid)
-	defer c.peerLock.Unlock()
-	c.peerLock.Lock()
-	if err == nil {
-		return c.DB.Query(TableNamePeer).Where(clover.Field("_id").Eq(peer.Uid)).Delete()
-	}
-	return nil
-}
 
 func (c *CloverDataSever) AddRelay(relay *model.Relay) error {
 	if relay == nil {
@@ -200,6 +191,18 @@ func (c *CloverDataSever) GetRelayByName(name string) (*model.Relay, error) {
 		return nil, err
 	}
 	peer := model.Relay{}
+	err = first.Unmarshal(&peer)
+	return &peer, err
+}
+
+func (c *CloverDataSever) GetUserByName(name string) (*model.User, error) {
+	defer c.relayLock.RUnlock()
+	c.relayLock.RLock()
+	first, err := c.DB.Query(TableNameUser).Where(clover.Field("name").Eq(name)).FindFirst()
+	if err != nil || first == nil {
+		return nil, err
+	}
+	peer := model.User{}
 	err = first.Unmarshal(&peer)
 	return &peer, err
 }

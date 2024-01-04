@@ -18,6 +18,7 @@ type Config struct {
 	RelayPort  uint16   `json:"relay_port"`
 	MustKey    bool     `json:"must_key"`
 	RelayIp    string   `json:"relay_ip"`
+	WebPort    uint16   `json:"web_port"`
 }
 
 var Conf *Config
