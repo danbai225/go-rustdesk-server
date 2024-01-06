@@ -1,11 +1,15 @@
 package impl
 
 import (
+	"context"
 	"errors"
 	logs "github.com/danbai225/go-logs"
+	"github.com/gogf/gf/v2/os/gcache"
+	"github.com/google/uuid"
 	"github.com/ostafen/clover"
 	"go-rustdesk-server/common"
 	"go-rustdesk-server/model"
+	"strings"
 	"sync"
 	"time"
 )
@@ -14,12 +18,16 @@ const (
 	TableNamePeer  = "Peer"
 	TableNameRelay = "Relay"
 	TableNameUser  = "User"
+	TableNameToken = "Token"
 )
+
+var cache = gcache.New()
 
 type CloverDataSever struct {
 	DB        *clover.DB
 	peerLock  sync.RWMutex
 	relayLock sync.RWMutex
+	userLock  sync.RWMutex
 }
 
 func (c *CloverDataSever) Close() error {
@@ -46,7 +54,38 @@ func (c *CloverDataSever) InitDB() error {
 	c.DB = db
 	_ = c.DB.CreateCollection(TableNamePeer)
 	_ = c.DB.CreateCollection(TableNameRelay)
+	_ = c.DB.CreateCollection(TableNameUser)
+	_ = c.DB.CreateCollection(TableNameToken)
+	_ = c.AddUser(&model.User{
+		Name:     "admin",
+		Password: "admin",
+		IsAdmin:  true,
+	})
+	all, _ := c.getTokenAll()
+	_ = cache.SetMap(context.Background(), all, time.Hour)
 	return nil
+}
+
+func (c *CloverDataSever) getTokenAll() (map[interface{}]interface{}, error) {
+	t, err := c.DB.Query(TableNameToken).FindFirst()
+	if err != nil || t == nil {
+		return nil, err
+	}
+	ts := make(map[interface{}]interface{})
+	err = t.Unmarshal(&ts)
+	return ts, err
+}
+func (c *CloverDataSever) saveToken(data map[interface{}]interface{}) error {
+	if data == nil {
+		return nil
+	}
+	_ = c.DB.Query(TableNameToken).Delete()
+	m := make(map[string]interface{})
+	for k, v := range data {
+		m[k.(string)] = v
+	}
+	_, err := c.DB.InsertOne(TableNameToken, clover.NewDocumentOf(m))
+	return err
 }
 func (c *CloverDataSever) GetPeerByUUID(uuid string) (*model.Peer, error) {
 	defer c.peerLock.RUnlock()
@@ -196,13 +235,65 @@ func (c *CloverDataSever) GetRelayByName(name string) (*model.Relay, error) {
 }
 
 func (c *CloverDataSever) GetUserByName(name string) (*model.User, error) {
-	defer c.relayLock.RUnlock()
-	c.relayLock.RLock()
+	defer c.userLock.RUnlock()
+	c.userLock.RLock()
 	first, err := c.DB.Query(TableNameUser).Where(clover.Field("name").Eq(name)).FindFirst()
 	if err != nil || first == nil {
 		return nil, err
 	}
-	peer := model.User{}
-	err = first.Unmarshal(&peer)
-	return &peer, err
+	user := model.User{}
+	err = first.Unmarshal(&user)
+	return &user, err
+}
+func (c *CloverDataSever) AddUser(user *model.User) error {
+	if user == nil {
+		return errors.New("nil user")
+	}
+	u, err := c.GetUserByName(user.Name)
+	if err != nil {
+		return err
+	} else if u != nil {
+		return errors.New("exist relay")
+	}
+	defer c.userLock.Unlock()
+	c.userLock.Lock()
+	m, err := common.ToMap(user, "json")
+	if err != nil {
+		return err
+	}
+	document := clover.NewDocumentOf(m)
+	_, err = c.DB.InsertOne(TableNameUser, document)
+	return err
+}
+func (c *CloverDataSever) CheckToken(token string) (*model.User, error) {
+	defer c.userLock.RUnlock()
+	c.userLock.RLock()
+	val, err := cache.Get(context.Background(), token)
+	if err != nil || val == nil {
+		return nil, errors.New("auth error")
+	}
+	user, err := c.GetUserByName(val.String())
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+func (c *CloverDataSever) GenToken(name string) (string, error) {
+	defer c.userLock.RUnlock()
+	c.userLock.RLock()
+	user, err := c.GetUserByName(name)
+	if err != nil {
+		return "", err
+	}
+	if user == nil {
+		return "", errors.New("user not exist")
+	}
+	token := strings.ReplaceAll(uuid.New().String(), "-", "")
+	err = cache.Set(context.Background(), token, name, time.Hour*256)
+	if err != nil {
+		return "", err
+	}
+	data, _ := cache.Data(context.Background())
+	_ = c.saveToken(data)
+	return token, nil
 }

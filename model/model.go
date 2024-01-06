@@ -29,4 +29,5 @@ type User struct {
 	Uid      string `json:"_id"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
+	IsAdmin  bool   `json:"is_admin"`
 }

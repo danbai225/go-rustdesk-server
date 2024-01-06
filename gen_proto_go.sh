@@ -1,1 +1,0 @@
-protoc --go_out=model/model_proto/ model/protos/*

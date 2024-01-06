@@ -1,0 +1,19 @@
+type Info {
+  "用户id"
+  uuid: String!
+  "用户名"
+  username: String!
+  "是否是管理员"
+  isAdmin: Boolean!
+  "token"
+  token: String!
+}
+type Query {
+  "获取用户信息"
+  selfInfo: Info!
+}
+
+type Mutation {
+  "登录"
+  login(username: String!, password: String!): Info!
+}
