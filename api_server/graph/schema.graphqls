@@ -16,11 +16,17 @@ type Peer {
   "上次心跳时间"
   lastHeartbeat : String!
 }
+type User{
+  "用户名"
+  username: String!
+  "是否是管理员"
+  isAdmin: Boolean!
+}
 type Query {
   "获取用户信息"
   selfInfo: Info!
   "获取所有用户信息"
-  users: [Info!]!
+  users: [User!]!
   "获取所有Peer信息"
   peers: [Peer!]!
 }

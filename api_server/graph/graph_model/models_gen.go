@@ -27,3 +27,10 @@ type Peer struct {
 
 type Query struct {
 }
+
+type User struct {
+	// 用户名
+	Username string `json:"username"`
+	// 是否是管理员
+	IsAdmin bool `json:"isAdmin"`
+}

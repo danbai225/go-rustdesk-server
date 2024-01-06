@@ -7,10 +7,11 @@ package graph
 import (
 	"context"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql"
 	"go-rustdesk-server/api_server/graph/graph_model"
 	"go-rustdesk-server/data_server"
 	"go-rustdesk-server/model"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // Login is the resolver for the login field.
@@ -85,11 +86,10 @@ func (r *mutationResolver) AddUser(ctx context.Context, username string, passwor
 	if err != nil {
 		return nil, err
 	}
-	user := ctx.Value("user").(*model.User)
-	if !user.IsAdmin {
+	if !checkAdmin(ctx) {
 		return nil, fmt.Errorf("not admin")
 	}
-	user, err = db.GetUserByName(username)
+	user, err := db.GetUserByName(username)
 	if err != nil {
 		return nil, err
 	} else if user != nil {
@@ -116,8 +116,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, username string) (boo
 	if err != nil {
 		return false, err
 	}
-	user := ctx.Value("user").(*model.User)
-	if !user.IsAdmin {
+	if !checkAdmin(ctx) {
 		return false, fmt.Errorf("not admin")
 	}
 	err = db.DelUser(username)
@@ -133,11 +132,10 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, username string, pass
 	if err != nil {
 		return nil, err
 	}
-	user := ctx.Value("user").(*model.User)
-	if !user.IsAdmin {
+	if !checkAdmin(ctx) {
 		return nil, fmt.Errorf("not admin")
 	}
-	user, err = db.GetUserByName(username)
+	user, err := db.GetUserByName(username)
 	if err != nil {
 		return nil, err
 	} else if user == nil {
@@ -177,27 +175,26 @@ func (r *queryResolver) SelfInfo(ctx context.Context) (*graph_model.Info, error)
 }
 
 // Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*graph_model.Info, error) {
+func (r *queryResolver) Users(ctx context.Context) ([]*graph_model.User, error) {
 	db, err := data_server.GetDataSever()
 	if err != nil {
 		return nil, err
 	}
-	user := ctx.Value("user").(string)
-	if !user.IsAdmin {
+	if !checkAdmin(ctx) {
 		return nil, fmt.Errorf("not admin")
 	}
 	users, err := db.GetUserAll()
 	if err != nil {
 		return nil, err
 	}
-	var infos []*graph_model.Info
+	var us []*graph_model.User
 	for _, u := range users {
-		infos = append(infos, &graph_model.Info{
+		us = append(us, &graph_model.User{
 			Username: u.Name,
 			IsAdmin:  u.IsAdmin,
 		})
 	}
-	return infos, nil
+	return us, nil
 }
 
 // Peers is the resolver for the peers field.
@@ -230,3 +227,22 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func checkAdmin(ctx context.Context) bool {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return false
+	}
+	username := ctx.Value("user").(string)
+	user, err := db.GetUserByName(username)
+	if err != nil || user == nil {
+		return false
+	}
+	return user.IsAdmin
+}
