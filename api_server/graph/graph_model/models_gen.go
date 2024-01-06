@@ -3,8 +3,6 @@
 package graph_model
 
 type Info struct {
-	// 用户id
-	UUID string `json:"uuid"`
 	// 用户名
 	Username string `json:"username"`
 	// 是否是管理员
@@ -14,6 +12,17 @@ type Info struct {
 }
 
 type Mutation struct {
+}
+
+type Peer struct {
+	// Peer 数据库唯一id
+	UUID string `json:"uuid"`
+	// Peer 名称（客户端id）
+	Name string `json:"name"`
+	// Peer ip
+	IP string `json:"ip"`
+	// 上次心跳时间
+	LastHeartbeat string `json:"lastHeartbeat"`
 }
 
 type Query struct {

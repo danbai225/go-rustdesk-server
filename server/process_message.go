@@ -111,6 +111,7 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 			UUID:        string(message.Uuid),
 			PK:          message.Pk,
 			LastRegTime: &now,
+			IP:          writer.GetAddr().GetIP(),
 		}
 		err = dataSever.AddPeerOrUpdate(peer)
 		if err != nil {

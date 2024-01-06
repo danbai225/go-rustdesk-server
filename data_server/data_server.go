@@ -19,8 +19,13 @@ type DataSever interface {
 	AddRelayOrUpdate(relay *model.Relay) error
 	GetRelayAllOnline() ([]*model.Relay, error)
 	GetUserByName(name string) (*model.User, error)
+	AddUser(user *model.User) error
+	UpdateUser(user *model.User) error
+	DelUser(name string) error
+	GetUserAll() ([]*model.User, error)
 	CheckToken(token string) (*model.User, error)
 	GenToken(name string) (string, error)
+	DelToken(token string) error
 	Close() error
 }
 

@@ -245,6 +245,36 @@ func (c *CloverDataSever) GetUserByName(name string) (*model.User, error) {
 	err = first.Unmarshal(&user)
 	return &user, err
 }
+func (c *CloverDataSever) UpdateUser(user *model.User) error {
+	defer c.userLock.Unlock()
+	c.userLock.Lock()
+	m, err := common.ToMap(user, "json")
+	if err != nil {
+		return err
+	}
+	return c.DB.Save(TableNameUser, clover.NewDocumentOf(m))
+}
+func (c *CloverDataSever) DelUser(name string) error {
+	defer c.userLock.Unlock()
+	c.userLock.Lock()
+	err := c.DB.Query(TableNameUser).Where(clover.Field("name").Eq(name)).Delete()
+	return err
+}
+func (c *CloverDataSever) GetUserAll() ([]*model.User, error) {
+	defer c.userLock.RUnlock()
+	c.userLock.RLock()
+	all, err := c.DB.Query(TableNameUser).FindAll()
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*model.User, 0)
+	for _, document := range all {
+		p := &model.User{}
+		_ = document.Unmarshal(p)
+		users = append(users, p)
+	}
+	return users, err
+}
 func (c *CloverDataSever) AddUser(user *model.User) error {
 	if user == nil {
 		return errors.New("nil user")
@@ -279,8 +309,8 @@ func (c *CloverDataSever) CheckToken(token string) (*model.User, error) {
 	return user, nil
 }
 func (c *CloverDataSever) GenToken(name string) (string, error) {
-	defer c.userLock.RUnlock()
-	c.userLock.RLock()
+	defer c.userLock.Unlock()
+	c.userLock.Unlock()
 	user, err := c.GetUserByName(name)
 	if err != nil {
 		return "", err
@@ -296,4 +326,15 @@ func (c *CloverDataSever) GenToken(name string) (string, error) {
 	data, _ := cache.Data(context.Background())
 	_ = c.saveToken(data)
 	return token, nil
+}
+func (c *CloverDataSever) DelToken(token string) error {
+	defer c.userLock.Unlock()
+	c.userLock.Lock()
+	_, err := cache.Remove(context.Background(), token)
+	if err != nil {
+		return err
+	}
+	data, _ := cache.Data(context.Background())
+	_ = c.saveToken(data)
+	return nil
 }

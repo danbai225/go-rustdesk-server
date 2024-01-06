@@ -7,6 +7,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql"
 	"go-rustdesk-server/api_server/graph/graph_model"
 	"go-rustdesk-server/data_server"
 	"go-rustdesk-server/model"
@@ -33,15 +34,28 @@ func (r *mutationResolver) Login(ctx context.Context, username string, password 
 		return nil, err
 	}
 	return &graph_model.Info{
-		UUID:     user.Uid,
 		Username: username,
 		IsAdmin:  user.IsAdmin,
 		Token:    token,
 	}, nil
 }
 
-// SelfInfo is the resolver for the selfInfo field.
-func (r *queryResolver) SelfInfo(ctx context.Context) (*graph_model.Info, error) {
+// Logout is the resolver for the logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return false, err
+	}
+	operationContext := graphql.GetOperationContext(ctx)
+	err = db.DelToken(operationContext.Headers.Get("Token"))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// ChangePassword is the resolver for the changePassword field.
+func (r *mutationResolver) ChangePassword(ctx context.Context, oldPassword string, newPassword string) (*graph_model.Info, error) {
 	db, err := data_server.GetDataSever()
 	if err != nil {
 		return nil, err
@@ -51,11 +65,161 @@ func (r *queryResolver) SelfInfo(ctx context.Context) (*graph_model.Info, error)
 	if err != nil {
 		return nil, err
 	}
+	if user.Password != oldPassword {
+		return nil, fmt.Errorf("old password error")
+	}
+	user.Password = newPassword
+	err = db.UpdateUser(user)
+	if err != nil {
+		return nil, err
+	}
 	return &graph_model.Info{
-		UUID:     user.Uid,
 		Username: user.Name,
 		IsAdmin:  user.IsAdmin,
 	}, nil
+}
+
+// AddUser is the resolver for the addUser field.
+func (r *mutationResolver) AddUser(ctx context.Context, username string, password string, isAdmin bool) (*graph_model.Info, error) {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return nil, err
+	}
+	user := ctx.Value("user").(*model.User)
+	if !user.IsAdmin {
+		return nil, fmt.Errorf("not admin")
+	}
+	user, err = db.GetUserByName(username)
+	if err != nil {
+		return nil, err
+	} else if user != nil {
+		return nil, fmt.Errorf("exist user")
+	}
+	user = &model.User{
+		Name:     username,
+		Password: password,
+		IsAdmin:  isAdmin,
+	}
+	err = db.AddUser(user)
+	if err != nil {
+		return nil, err
+	}
+	return &graph_model.Info{
+		Username: user.Name,
+		IsAdmin:  user.IsAdmin,
+	}, nil
+}
+
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, username string) (bool, error) {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return false, err
+	}
+	user := ctx.Value("user").(*model.User)
+	if !user.IsAdmin {
+		return false, fmt.Errorf("not admin")
+	}
+	err = db.DelUser(username)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, username string, password *string, isAdmin *bool) (*graph_model.Info, error) {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return nil, err
+	}
+	user := ctx.Value("user").(*model.User)
+	if !user.IsAdmin {
+		return nil, fmt.Errorf("not admin")
+	}
+	user, err = db.GetUserByName(username)
+	if err != nil {
+		return nil, err
+	} else if user == nil {
+		return nil, fmt.Errorf("not exist user")
+	}
+	if password != nil {
+		user.Password = *password
+	}
+	if isAdmin != nil {
+		user.IsAdmin = *isAdmin
+	}
+	err = db.UpdateUser(user)
+	if err != nil {
+		return nil, err
+	}
+	return &graph_model.Info{
+		Username: user.Name,
+		IsAdmin:  user.IsAdmin,
+	}, nil
+}
+
+// SelfInfo is the resolver for the selfInfo field.
+func (r *queryResolver) SelfInfo(ctx context.Context) (*graph_model.Info, error) {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return nil, err
+	}
+	username := ctx.Value("user").(string)
+	user, err := db.GetUserByName(username)
+	if err != nil {
+		return nil, err
+	}
+	return &graph_model.Info{
+		Username: user.Name,
+		IsAdmin:  user.IsAdmin,
+	}, nil
+}
+
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*graph_model.Info, error) {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return nil, err
+	}
+	user := ctx.Value("user").(string)
+	if !user.IsAdmin {
+		return nil, fmt.Errorf("not admin")
+	}
+	users, err := db.GetUserAll()
+	if err != nil {
+		return nil, err
+	}
+	var infos []*graph_model.Info
+	for _, u := range users {
+		infos = append(infos, &graph_model.Info{
+			Username: u.Name,
+			IsAdmin:  u.IsAdmin,
+		})
+	}
+	return infos, nil
+}
+
+// Peers is the resolver for the peers field.
+func (r *queryResolver) Peers(ctx context.Context) ([]*graph_model.Peer, error) {
+	db, err := data_server.GetDataSever()
+	if err != nil {
+		return nil, err
+	}
+	peers, err := db.GetPeerAll()
+	if err != nil {
+		return nil, err
+	}
+	var infos []*graph_model.Peer
+	for _, p := range peers {
+		infos = append(infos, &graph_model.Peer{
+			UUID:          p.UUID,
+			Name:          p.ID,
+			IP:            p.IP,
+			LastHeartbeat: p.LastRegTime.Format("2006-01-02 15:04:05"),
+		})
+	}
+	return infos, nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -1,6 +1,4 @@
 type Info {
-  "用户id"
-  uuid: String!
   "用户名"
   username: String!
   "是否是管理员"
@@ -8,12 +6,36 @@ type Info {
   "token"
   token: String!
 }
+type Peer {
+  "Peer 数据库唯一id"
+  uuid : String!
+  "Peer 名称（客户端id）"
+  name : String!
+  "Peer ip"
+  ip : String!
+  "上次心跳时间"
+  lastHeartbeat : String!
+}
 type Query {
   "获取用户信息"
   selfInfo: Info!
+  "获取所有用户信息"
+  users: [Info!]!
+  "获取所有Peer信息"
+  peers: [Peer!]!
 }
 
 type Mutation {
   "登录"
   login(username: String!, password: String!): Info!
+  "登出"
+  logout: Boolean!
+  "修改密码"
+  changePassword(oldPassword: String!, newPassword: String!): Info!
+  "添加用户"
+  addUser(username: String!, password: String!, isAdmin: Boolean!): Info!
+  "删除用户"
+  deleteUser(username: String!): Boolean!
+  "修改用户"
+  updateUser(username: String!, password: String, isAdmin: Boolean): Info!
 }

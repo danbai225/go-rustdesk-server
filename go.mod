@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-ping/ping v1.1.0
 	github.com/gogf/gf/v2 v2.6.1
+	github.com/google/uuid v1.4.0
 	github.com/ostafen/clover v1.2.0
 	github.com/shabbyrobe/go-num v0.0.0-20220218224608-bad1c8f534d7
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -42,7 +43,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
-	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
