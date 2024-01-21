@@ -24,7 +24,7 @@ export default function Login() {
     <Card className="w-[350px]">
       <CardHeader>
         <CardTitle>Create project</CardTitle>
-        <CardDescription>Deploy your new project in one-click.</CardDescription>
+        <CardDescription>Deploy your 1new project in one-click.</CardDescription>
       </CardHeader>
       <CardContent>
         <form>
