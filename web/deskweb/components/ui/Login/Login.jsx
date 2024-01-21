@@ -42,7 +42,7 @@ export default function Login() {
                 <SelectContent position="popper">
                   <SelectItem value="next">Next.js</SelectItem>
                   <SelectItem value="sveltekit">SvelteKit</SelectItem>
-                  <SelectItem value="astro">Astro</SelectItem>
+                  <SelectItem value="1astro">Astro</SelectItem>
                   <SelectItem value="nuxt">Nux1t.js</SelectItem>
                 </SelectContent>
               </Select>
