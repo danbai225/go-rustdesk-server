@@ -10,6 +10,7 @@ services:
       - ./clover-db/:/app/clover-db
       - ./key/:/app/key
     ports:
+      - "21114:21114"
       - "21115:21115"
       - "21116:21116/tcp"
       - "21116:21116/udp"
