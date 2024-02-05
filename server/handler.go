@@ -18,13 +18,16 @@ type ringMsg struct {
 	Writer  *common.Writer
 }
 
-func getMsgForm(id, Type string, timeOut uint) (*common.Writer, interface{}) {
+func getMsgForm(id string, Type []string, timeOut uint) (*common.Writer, interface{}) {
 	if timeOut == 0 {
 		timeOut = 3
 	}
 	timer := time.NewTimer(time.Second * time.Duration(timeOut))
 	defer timer.Stop()
-
+	m := make(map[string]*struct{})
+	for _, v := range Type {
+		m[v] = &struct{}{}
+	}
 	for {
 		select {
 		case <-timer.C:
@@ -37,7 +40,7 @@ func getMsgForm(id, Type string, timeOut uint) (*common.Writer, interface{}) {
 				if v, ok := val.(*ringMsg); ok {
 					if v.InsTime.Add(time.Second * time.Duration(v.TimeOut)).Before(now) {
 						next.Set(nil)
-					} else if v.ID == id && v.Type == Type {
+					} else if v.ID == id && m[v.Type] != nil {
 						next.Set(nil)
 						return v.Writer, v.Val
 					}
@@ -110,14 +113,14 @@ func handlerMsg(msg []byte, writer *common.Writer) {
 		}
 		response = model_proto.NewRendezvousMessage(RendezvousMessageRequestRelay(RequestRelay))
 	case model_proto.TypeRendezvousMessageRelayResponse:
-		//请求继中
+		//响应继中
 		RelayResponse := message.GetRelayResponse()
 		if RelayResponse == nil {
 			return
 		}
 		RendezvousMessageRelayResponse(writer, RelayResponse)
 	case model_proto.TypeRendezvousMessagePunchHoleSent:
-		//请求打洞
+		//响应打洞
 		PunchHoleSent := message.GetPunchHoleSent()
 		if PunchHoleSent == nil {
 			return

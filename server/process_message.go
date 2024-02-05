@@ -6,6 +6,7 @@ import (
 	"go-rustdesk-server/model"
 	"go-rustdesk-server/model/model_proto"
 	"go-rustdesk-server/my_bytes"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"time"
 )
 
@@ -44,39 +45,27 @@ func RendezvousMessageRegisterPeer(message *model_proto.RegisterPeer, writer *co
 }
 func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common.Writer) *model_proto.RegisterPkResponse {
 	res := &model_proto.RegisterPkResponse{Result: model_proto.RegisterPkResponse_SERVER_ERROR}
+
 	if len(message.GetId()) < common.MinKeyLen {
 		res.Result = model_proto.RegisterPkResponse_UUID_MISMATCH
 		return res
 	}
-	//改变 ID
-	if id := message.GetOldId(); id != "" {
-		idPeer, err := dataSever.GetPeerByID(id)
-		if err != nil {
-			logs.Debug(err)
-			return res
-		}
-		idPeer.ID = message.Id
-		err = dataSever.UpdatePeer(idPeer)
-		if err != nil {
-			res.Result = model_proto.RegisterPkResponse_SERVER_ERROR
-			logs.Err(err)
-		} else {
-			res.Result = model_proto.RegisterPkResponse_OK
-			writer.SetKey(message.Id)
-		}
-		return res
+	change := false
+	id := message.GetId()
+	if message.GetOldId() != "" {
+		change = true
+		id = message.GetOldId()
 	}
-
-	idPeer, err := dataSever.GetPeerByID(message.GetId())
+	idPeer, err := dataSever.GetPeerByID(id)
 	if err != nil {
 		logs.Debug(err)
 		return res
 	}
-	change := false
-	if idPeer != nil {
-		if idPeer.UUID == "" {
-			change = true
-		} else if idPeer.UUID == string(message.GetUuid()) {
+	if idPeer == nil {
+		idPeer, _ = dataSever.GetPeerByUUID(string(message.GetUuid()))
+	}
+	if idPeer != nil && !change {
+		if idPeer.UUID == string(message.GetUuid()) {
 			//存在注册
 			if string(idPeer.PK) != string(message.GetPk()) {
 				if idPeer.IP != writer.GetAddr().GetIP() {
@@ -92,6 +81,7 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 		}
 		res.Result = model_proto.RegisterPkResponse_OK
 	}
+
 	getWriter, err := common.GetWriter(message.GetId(), common.UDP)
 	ipChange := false
 	if err == nil {
@@ -104,9 +94,14 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 		writer.SetKey(idPeer.ID)
 	}
 	change = ipChange || change || idPeer == nil
+	uid := ""
+	if idPeer != nil && idPeer.Uid != "" {
+		uid = idPeer.Uid
+	}
 	if change {
 		now := time.Now()
 		peer := &model.Peer{
+			Uid:         uid,
 			ID:          message.Id,
 			UUID:        string(message.Uuid),
 			PK:          message.Pk,
@@ -119,18 +114,17 @@ func RendezvousMessageRegisterPk(message *model_proto.RegisterPk, writer *common
 			logs.Err(err)
 		} else {
 			res.Result = model_proto.RegisterPkResponse_OK
+			writer.SetKey(message.GetId())
 		}
 	}
-	if res.Result == model_proto.RegisterPkResponse_OK {
-		writer.SetKey(message.GetId())
-	}
+
 	return res
 }
 func RendezvousMessageSoftwareUpdate(message *model_proto.SoftwareUpdate) *model_proto.SoftwareUpdate {
 	res := &model_proto.SoftwareUpdate{}
 	return res
 }
-func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, writer *common.Writer) *model_proto.PunchHoleResponse {
+func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, writer *common.Writer) protoreflect.ProtoMessage {
 	res := &model_proto.PunchHoleResponse{}
 	if common.Conf.MustKey {
 		if message.LicenceKey != common.GetPkStr() {
@@ -174,7 +168,7 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 			SocketAddr:  my_bytes.EncodeAddr(writer.GetAddrStr()),
 			RelayServer: relayServer,
 		}))
-		_, lMsg := getMsgForm(message.GetId(), model_proto.TypeRendezvousMessageLocalAddr, 3)
+		_, lMsg := getMsgForm(message.GetId(), []string{model_proto.TypeRendezvousMessageLocalAddr}, 3)
 		if lMsg == nil {
 			res.OtherFailure = "NoReturnMessage"
 			return res
@@ -193,11 +187,12 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 			RelayServer: relayServer,
 			NatType:     natType,
 		}))
-		w, lMsg := getMsgForm(message.GetId(), model_proto.TypeRendezvousMessagePunchHoleSent, 3)
+		w, lMsg := getMsgForm(message.GetId(), []string{model_proto.TypeRendezvousMessagePunchHoleSent, model_proto.TypeRendezvousMessageRelayResponse}, 3)
 		if lMsg == nil {
 			res.OtherFailure = "NoReturnMessage"
 			return res
 		}
+
 		if m, ok1 := lMsg.(*model_proto.PunchHoleSent); ok1 {
 			logs.Debug("PunchHoleSent", w.GetAddrStr(), my_bytes.DecodeAddr(m.GetSocketAddr()))
 			res.SocketAddr = my_bytes.EncodeAddr(w.GetAddrStr())
@@ -206,6 +201,14 @@ func RendezvousMessagePunchHoleRequest(message *model_proto.PunchHoleRequest, wr
 			res.Union = &model_proto.PunchHoleResponse_NatType{
 				NatType: m.GetNatType(),
 			}
+		}
+		if m, ok1 := lMsg.(*model_proto.RelayResponse); ok1 {
+			m.SocketAddr = my_bytes.EncodeAddr(w.GetAddrStr())
+			m.RelayServer = m.GetRelayServer()
+			m.Union = &model_proto.RelayResponse_Pk{
+				Pk: common.GetSignPK(m.GetVersion(), peer.ID, peer.PK),
+			}
+			return m
 		}
 	}
 	return res
@@ -242,7 +245,7 @@ func RendezvousMessageRequestRelay(message *model_proto.RequestRelay) *model_pro
 			return res
 		}
 		w.SendMsg(model_proto.NewRendezvousMessage(message))
-		_, lMsg := getMsgForm(message.GetId(), model_proto.TypeRendezvousMessageRelayResponse, 3)
+		_, lMsg := getMsgForm(message.GetId(), []string{model_proto.TypeRendezvousMessageRelayResponse}, 3)
 		if lMsg == nil {
 			return res
 		} else if m, ok1 := lMsg.(*model_proto.RelayResponse); ok1 {

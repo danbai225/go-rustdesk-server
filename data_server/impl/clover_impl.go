@@ -309,12 +309,12 @@ func (c *CloverDataSever) CheckToken(token string) (*model.User, error) {
 	return user, nil
 }
 func (c *CloverDataSever) GenToken(name string) (string, error) {
-	defer c.userLock.Unlock()
-	c.userLock.Unlock()
 	user, err := c.GetUserByName(name)
 	if err != nil {
 		return "", err
 	}
+	defer c.userLock.Unlock()
+	c.userLock.Lock()
 	if user == nil {
 		return "", errors.New("user not exist")
 	}
