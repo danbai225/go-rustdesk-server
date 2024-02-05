@@ -1,0 +1,28 @@
+.Container_div{
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.colustm_right{ 
+     position: absolute;
+     top: 0;
+     right: 0;
+     overflow: hidden;
+}
+
+.colustm_left{
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+}
+.colustm_bottom{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
