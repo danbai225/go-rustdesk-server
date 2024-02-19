@@ -1,0 +1,28 @@
+.HeaderContainer{
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+     padding-top: 51px;
+     padding-left: 41px;
+}
+.title{
+    font-size: 26px;
+    padding-left: 11px;
+}
+.search{
+    /* Frame 2 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 20px 12px 16px;
+gap: 20px;
+
+width: 281px;
+height: 48px;
+
+background: rgba(28, 31, 37, 0.6);
+border-radius: 16px;
+}

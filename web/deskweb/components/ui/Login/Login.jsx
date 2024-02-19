@@ -1,26 +1,48 @@
-import * as React from "react"
+"use client"
+import React, { useState,useEffect } from 'react';
+import style from "./Login.module.css"
 
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
+import { Input } from "@/components/ui/input"
+import { 
+  Card ,
   CardHeader,
   CardTitle,
+  CardContent,
+  CardFooter
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import style from "./Login.module.css"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+
 
 export default function Login() {
+
+  const [clicked, setclicked] = useState(false);
+  const [ColorBoolean,setBoolean] = useState(false);
+  // 账号
+  const [inputValue, setInputValue] = useState('');
+//  密码
+const [inputPassword,setPassword] = useState("");
+  // 定义处理输入框变化的事件处理程序
+  const handleInputChange = (event) => {
+    // 更新状态变量的值
+    setInputValue(event.target.value);
+  };
+  const handlePasswordChange = (event) =>{
+     setPassword(event.target.value);
+  }
+  const handleSubmit = (event) => {
+    setclicked(!clicked);
+    // 阻止默认表单提交行为
+    event.preventDefault();
+    // 在这里可以使用 inputValues 进行其他操作
+    if(inputValue || inputPassword){
+       setBoolean(false)
+      //  登陆之后操作
+      
+    }else{
+      setBoolean(true)
+    }
+
+  };
   return (
     <div className={style.Container_div}>
       <div className={style.colustm_right}>
@@ -44,26 +66,33 @@ export default function Login() {
 </svg>
 
   </div>
+
    <Card className="w-[350px] font  border-0 ">
+   <form onSubmit={handleSubmit} >
       <CardHeader>
         <CardTitle  className="font-login text-left     font-normal text-4xl">LOGIN</CardTitle>
       </CardHeader>
+
       <CardContent>
-        <form>
+      
           <div className="grid w-full items-center gap-4 text-black  ">
             <div className="flex flex-col space-y-1.5">
-              <Input id="name" placeholder="Username" />
+              <Input id="name" placeholder="Username"  value={inputValue} onChange={handleInputChange}    className={ColorBoolean?'border-2 border-rose-600':''} />
             </div>
             <div className="flex flex1-col space-y-1.5">
-            <Input id="name" placeholder="Password" />
+            <Input id="name"  value={inputPassword} onChange={ handlePasswordChange}  placeholder="Password"  className={ColorBoolean?'border-2 border-rose-600':''}  />
             </div>
           </div>
-        </form>
+    
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button className="w-full bg-[#4044ED]">Login</Button>
+
+        <Button  type="submit" variant={clicked?'outline':''}  className="w-full bg-[#4044ED]">Login</Button>
+
       </CardFooter>
+      </form>
     </Card>
+
     </div>
  
   )
